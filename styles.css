@@ -102,6 +102,17 @@ body::after {
   background: var(--panel-strong);
 }
 
+.hero-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(240px, 360px);
+  gap: 24px;
+  align-items: center;
+}
+
+.hero-copy {
+  min-width: 0;
+}
+
 .app-sidebar {
   position: sticky;
   top: 16px;
@@ -143,6 +154,129 @@ body::after {
   color: var(--muted);
   line-height: 1.75;
   font-size: 1rem;
+}
+
+.hero-mascot-stage {
+  position: relative;
+  min-height: 300px;
+  display: grid;
+  place-items: center;
+}
+
+.hero-mascot-bob {
+  position: relative;
+  animation: mascot-bob 4.4s ease-in-out infinite;
+}
+
+.hero-mascot-tilt {
+  position: relative;
+  display: grid;
+  place-items: center;
+  animation: mascot-tilt 3.8s ease-in-out infinite;
+  transform-origin: 50% 90%;
+}
+
+.hero-mascot-card {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 280px);
+  min-height: 260px;
+  border-radius: 28px;
+  border: 1px solid rgba(246, 245, 234, 0.08);
+  background:
+    radial-gradient(circle at 50% 18%, rgba(243, 202, 77, 0.12), transparent 42%),
+    linear-gradient(180deg, rgba(246, 245, 234, 0.04), rgba(246, 245, 234, 0.01));
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+}
+
+.hero-mascot-card::before {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border-radius: 22px;
+  border: 1px dashed rgba(246, 245, 234, 0.08);
+}
+
+.hero-mascot-placeholder {
+  position: relative;
+  z-index: 1;
+  min-height: 260px;
+  display: grid;
+  place-content: center;
+  gap: 10px;
+  padding: 26px;
+  text-align: center;
+}
+
+.hero-mascot-image {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 20px;
+  filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.24));
+}
+
+.is-hidden {
+  display: none;
+}
+
+.hero-mascot-placeholder-title {
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-mascot-placeholder-copy {
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+.hero-mascot-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  width: 170px;
+  height: 28px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.38) 0%, rgba(0, 0, 0, 0.06) 68%, transparent 100%);
+  animation: mascot-shadow 4.4s ease-in-out infinite;
+}
+
+.hero-mascot-orbit {
+  position: absolute;
+  top: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(243, 202, 77, 0.92);
+  box-shadow: 0 0 0 6px rgba(243, 202, 77, 0.08);
+  opacity: 0.72;
+}
+
+.hero-mascot-orbit::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 999px;
+  background: rgba(28, 40, 29, 0.95);
+}
+
+.hero-mascot-orbit.orbit-left {
+  left: 4px;
+  animation: orbit-left 4.8s ease-in-out infinite;
+}
+
+.hero-mascot-orbit.orbit-right {
+  right: 4px;
+  animation: orbit-right 5.2s ease-in-out infinite;
 }
 
 .shell-metrics {
@@ -805,6 +939,63 @@ body::after {
   font-size: 0.84rem;
 }
 
+@keyframes mascot-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes mascot-tilt {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+
+  50% {
+    transform: rotate(2.8deg);
+  }
+}
+
+@keyframes mascot-shadow {
+  0%,
+  100% {
+    transform: translateX(-50%) scaleX(1);
+    opacity: 0.58;
+  }
+
+  50% {
+    transform: translateX(-50%) scaleX(0.9);
+    opacity: 0.34;
+  }
+}
+
+@keyframes orbit-left {
+  0%,
+  100% {
+    transform: translate(-6px, 8px) rotate(0deg);
+  }
+
+  50% {
+    transform: translate(-22px, -12px) rotate(16deg);
+  }
+}
+
+@keyframes orbit-right {
+  0%,
+  100% {
+    transform: translate(6px, 10px) rotate(0deg);
+  }
+
+  50% {
+    transform: translate(18px, -14px) rotate(-16deg);
+  }
+}
+
 @media (max-width: 1360px) {
   .app-layout {
     grid-template-columns: minmax(var(--nav-min), 18fr) minmax(0, 82fr);
@@ -830,6 +1021,14 @@ body::after {
 @media (max-width: 760px) {
   .app-layout {
     width: min(100% - 20px, var(--layout-max));
+  }
+
+  .hero-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-mascot-stage {
+    min-height: 220px;
   }
 
   .page-shell {

@@ -163,9 +163,12 @@ const overallDone = document.querySelector("#overallDone");
 const overallDoing = document.querySelector("#overallDoing");
 const overallStageSummary = document.querySelector("#overallStageSummary");
 const miniJourney = document.querySelector("#miniJourney");
+const heroMascotImage = document.querySelector("#heroMascotImage");
+const heroMascotPlaceholder = document.querySelector(".hero-mascot-placeholder");
 
 const rows = calculateRows(stages);
 journeyGrid.style.gridTemplateRows = `repeat(${rows.totalRows}, var(--row-unit))`;
+setupHeroMascot();
 renderJourney();
 
 function calculateRows(input) {
@@ -477,6 +480,38 @@ function loadSectionState() {
 
 function saveSectionState() {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(sectionState));
+}
+
+function setupHeroMascot() {
+  if (!heroMascotImage || !heroMascotPlaceholder) {
+    return;
+  }
+
+  const showMascot = () => {
+    heroMascotImage.classList.remove("is-hidden");
+    heroMascotPlaceholder.classList.add("is-hidden");
+  };
+
+  const showPlaceholder = () => {
+    heroMascotImage.classList.add("is-hidden");
+    heroMascotPlaceholder.classList.remove("is-hidden");
+  };
+
+  heroMascotImage.addEventListener("load", () => {
+    showMascot();
+  });
+
+  heroMascotImage.addEventListener("error", () => {
+    showPlaceholder();
+  });
+
+  if (heroMascotImage.complete) {
+    if (heroMascotImage.naturalWidth > 0) {
+      showMascot();
+    } else {
+      showPlaceholder();
+    }
+  }
 }
 
 function renderOverview(stageEntries, totals) {
