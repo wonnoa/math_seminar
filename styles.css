@@ -180,7 +180,7 @@ body::after {
 
 .hero-mascot-bubble {
   position: absolute;
-  top: -18px;
+  top: -9px;
   right: 8px;
   z-index: 4;
   max-width: 150px;
@@ -199,11 +199,12 @@ body::after {
   content: "";
   position: absolute;
   right: 22px;
-  bottom: -10px;
+  bottom: -8px;
   width: 18px;
   height: 18px;
   background: #ffffff;
   clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform: rotate(-18deg);
 }
 
 .hero-mascot-card {
