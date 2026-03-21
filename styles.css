@@ -228,6 +228,22 @@ body::after {
   gap: 8px;
 }
 
+.nav-slot-label {
+  color: var(--ink);
+  font-size: 0.96rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.nav-slot-labeled {
+  background: rgba(246, 245, 234, 0.04);
+}
+
+.nav-slot-labeled .nav-slot-icon {
+  background: rgba(142, 222, 86, 0.08);
+  border-color: rgba(142, 222, 86, 0.18);
+}
+
 .nav-slot-line {
   display: block;
   width: 78%;
