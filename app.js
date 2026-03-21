@@ -588,8 +588,14 @@ function buildSnakePoints(count, width, height) {
     const remaining = count - consumed;
     const rowCount = Math.min(maxPerRow, remaining);
     const y = topPadding + rowGap * rowIndex;
-    const xList = distributeX(rowCount, leftPadding, width - rightPadding);
-    const orderedX = rowIndex % 2 === 0 ? xList : [...xList].reverse();
+    const fullRowX = distributeX(maxPerRow, leftPadding, width - rightPadding);
+    const visibleX =
+      rowCount === maxPerRow
+        ? fullRowX
+        : rowIndex % 2 === 0
+          ? fullRowX.slice(0, rowCount)
+          : fullRowX.slice(maxPerRow - rowCount);
+    const orderedX = rowIndex % 2 === 0 ? visibleX : [...visibleX].reverse();
 
     for (const x of orderedX) {
       points.push({ x, y });
