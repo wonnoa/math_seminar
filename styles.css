@@ -178,6 +178,34 @@ body::after {
   transform-origin: 50% 90%;
 }
 
+.hero-mascot-bubble {
+  position: absolute;
+  top: -18px;
+  right: 8px;
+  z-index: 4;
+  max-width: 150px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  background: #ffffff;
+  color: #152016;
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.18);
+}
+
+.hero-mascot-bubble::after {
+  content: "";
+  position: absolute;
+  right: 22px;
+  bottom: -10px;
+  width: 18px;
+  height: 18px;
+  background: #ffffff;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
 .hero-mascot-card {
   position: relative;
   z-index: 2;
