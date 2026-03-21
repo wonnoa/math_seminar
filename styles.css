@@ -181,7 +181,7 @@ body::after {
 .hero-mascot-bubble {
   position: absolute;
   top: 28px;
-  right: -4px;
+  right: 14px;
   z-index: 4;
   max-width: 150px;
   padding: 10px 14px;
@@ -200,7 +200,7 @@ body::after {
 .hero-mascot-bubble::after {
   content: "";
   position: absolute;
-  right: 28px;
+  right: 24px;
   bottom: -10px;
   width: 18px;
   height: 18px;
