@@ -164,6 +164,7 @@ const overallDoing = document.querySelector("#overallDoing");
 const overallStageSummary = document.querySelector("#overallStageSummary");
 const miniJourney = document.querySelector("#miniJourney");
 const heroMascotImage = document.querySelector("#heroMascotImage");
+const heroMascotCard = document.querySelector(".hero-mascot-card");
 const heroMascotPlaceholder = document.querySelector(".hero-mascot-placeholder");
 
 const rows = calculateRows(stages);
@@ -483,18 +484,20 @@ function saveSectionState() {
 }
 
 function setupHeroMascot() {
-  if (!heroMascotImage || !heroMascotPlaceholder) {
+  if (!heroMascotImage || !heroMascotPlaceholder || !heroMascotCard) {
     return;
   }
 
   const showMascot = () => {
     heroMascotImage.classList.remove("is-hidden");
     heroMascotPlaceholder.classList.add("is-hidden");
+    heroMascotCard.classList.add("has-image");
   };
 
   const showPlaceholder = () => {
     heroMascotImage.classList.add("is-hidden");
     heroMascotPlaceholder.classList.remove("is-hidden");
+    heroMascotCard.classList.remove("has-image");
   };
 
   heroMascotImage.addEventListener("load", () => {

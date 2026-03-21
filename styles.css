@@ -165,6 +165,7 @@ body::after {
 
 .hero-mascot-bob {
   position: relative;
+  width: min(100%, 308px);
   animation: mascot-bob 4.4s ease-in-out infinite;
 }
 
@@ -172,6 +173,7 @@ body::after {
   position: relative;
   display: grid;
   place-items: center;
+  width: 100%;
   animation: mascot-tilt 3.8s ease-in-out infinite;
   transform-origin: 50% 90%;
 }
@@ -180,7 +182,7 @@ body::after {
   position: relative;
   z-index: 2;
   width: min(100%, 280px);
-  min-height: 260px;
+  height: 280px;
   border-radius: 28px;
   border: 1px solid rgba(246, 245, 234, 0.08);
   background:
@@ -188,6 +190,16 @@ body::after {
     linear-gradient(180deg, rgba(246, 245, 234, 0.04), rgba(246, 245, 234, 0.01));
   box-shadow: 0 18px 32px rgba(0, 0, 0, 0.22);
   overflow: hidden;
+}
+
+.hero-mascot-card.has-image {
+  width: min(100%, 308px);
+  height: 308px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  overflow: visible;
 }
 
 .hero-mascot-card::before {
@@ -198,10 +210,14 @@ body::after {
   border: 1px dashed rgba(246, 245, 234, 0.08);
 }
 
+.hero-mascot-card.has-image::before {
+  display: none;
+}
+
 .hero-mascot-placeholder {
   position: relative;
   z-index: 1;
-  min-height: 260px;
+  min-height: 280px;
   display: grid;
   place-content: center;
   gap: 10px;
@@ -216,7 +232,8 @@ body::after {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  padding: 20px;
+  object-position: center bottom;
+  padding: 0;
   filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.24));
 }
 
