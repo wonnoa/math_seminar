@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Linear Algebra Journey Map</title>
+    <meta
+      name="description"
+      content="A playful linear algebra journey map built from the Strang table of contents, with section-by-section progress tracking."
+    />
+    <meta name="theme-color" content="#1a2418" />
+    <meta property="og:title" content="Linear Algebra Journey Map" />
+    <meta
+      property="og:description"
+      content="Track linear algebra chapters and sections on a game-like journey map."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="./social-preview.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Linear Algebra Journey Map" />
+    <meta
+      name="twitter:description"
+      content="Track linear algebra chapters and sections on a game-like journey map."
+    />
+    <meta name="twitter:image" content="./social-preview.svg" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="./site.webmanifest" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-layout">
+      <aside class="app-sidebar" aria-label="primary navigation scaffold">
+        <div class="sidebar-frame">
+          <div class="sidebar-brand">
+            <p class="eyebrow">Primary Rail</p>
+            <h2>Navigation Slots</h2>
+            <p class="sidebar-copy">
+              Leave this column empty for now. It reserves space for the main study menu,
+              identity, and fast-access actions.
+            </p>
+          </div>
+
+          <nav class="sidebar-nav">
+            <button class="nav-slot" type="button" aria-label="menu slot 1">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-lines">
+                <span class="nav-slot-line short"></span>
+                <span class="nav-slot-line"></span>
+              </span>
+            </button>
+            <button class="nav-slot" type="button" aria-label="menu slot 2">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-lines">
+                <span class="nav-slot-line short"></span>
+                <span class="nav-slot-line"></span>
+              </span>
+            </button>
+            <button class="nav-slot" type="button" aria-label="menu slot 3">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-lines">
+                <span class="nav-slot-line short"></span>
+                <span class="nav-slot-line"></span>
+              </span>
+            </button>
+            <button class="nav-slot" type="button" aria-label="menu slot 4">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-lines">
+                <span class="nav-slot-line short"></span>
+                <span class="nav-slot-line"></span>
+              </span>
+            </button>
+            <button class="nav-slot" type="button" aria-label="menu slot 5">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-lines">
+                <span class="nav-slot-line short"></span>
+                <span class="nav-slot-line"></span>
+              </span>
+            </button>
+            <button class="nav-slot" type="button" aria-label="menu slot 6">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-lines">
+                <span class="nav-slot-line short"></span>
+                <span class="nav-slot-line"></span>
+              </span>
+            </button>
+          </nav>
+
+          <div class="sidebar-footnote">
+            <span>Desktop ratio: 4 : 16 : 5</span>
+            <span>Vertical rhythm: 56 px</span>
+          </div>
+        </div>
+      </aside>
+
+      <div class="page-shell">
+        <header class="blueprint-header">
+          <p class="eyebrow">Phase 3 · Structural Layout Pass</p>
+          <h1>Linear Algebra Journey Map</h1>
+          <p class="header-copy">
+            This pass locks the shell first: a left navigation rail, a center learning canvas, and
+            a right utility rail. Content can change later, but the proportions should stay stable.
+          </p>
+          <div class="shell-metrics" aria-label="layout ratio summary">
+            <span>left rail 16</span>
+            <span>center canvas 64</span>
+            <span>right rail 20</span>
+          </div>
+        </header>
+
+        <section class="overview-panel" aria-label="overall progress overview">
+          <div class="overview-copy">
+            <p class="spec-label">Overall Progress</p>
+            <div class="overview-percentline">
+              <strong id="overallPercent">0%</strong>
+              <span id="overallPercentCaption">complete</span>
+            </div>
+            <p id="overallSummary" class="overview-summary">0 of 0 sections complete</p>
+            <div class="overview-metrics">
+              <span id="overallDone" class="overview-chip done">0 done</span>
+              <span id="overallDoing" class="overview-chip doing">0 doing</span>
+            </div>
+          </div>
+          <div class="overview-map">
+            <div class="overview-map-head">
+              <span>Mini Journey</span>
+              <span id="overallStageSummary">0/0 stages active</span>
+            </div>
+            <svg
+              id="miniJourney"
+              class="mini-journey"
+              viewBox="0 0 860 190"
+              role="img"
+              aria-label="overall progress mini journey map"
+            ></svg>
+          </div>
+        </section>
+
+        <main class="blueprint-stage">
+          <section class="journey-panel">
+            <div class="panel-topline">
+              <span>Journey Canvas</span>
+              <span id="gridSummary">calculating...</span>
+            </div>
+            <div class="column-ruler" aria-hidden="true">
+              <span>1</span>
+              <span>2</span>
+              <span>3</span>
+              <span>4</span>
+              <span>5</span>
+              <span>6</span>
+              <span>7</span>
+              <span>8</span>
+              <span>9</span>
+              <span>10</span>
+              <span>11</span>
+              <span>12</span>
+            </div>
+            <div id="journeyGrid" class="journey-grid" aria-label="journey blueprint canvas"></div>
+          </section>
+        </main>
+      </div>
+
+      <aside class="utility-rail" aria-label="future utility widgets">
+        <div class="rail-card rail-spec">
+          <p class="eyebrow">Utility Rail</p>
+          <h2>Reserved Space</h2>
+          <div class="ratio-stack">
+            <span>Grid ratio 4 : 16 : 5</span>
+            <span>Sticky side rails on desktop</span>
+            <span>Modules can be filled later</span>
+          </div>
+        </div>
+
+        <div class="rail-card">
+          <p class="eyebrow">Empty Module</p>
+          <div class="rail-placeholder tall"></div>
+        </div>
+
+        <div class="rail-card">
+          <p class="eyebrow">Empty Module</p>
+          <div class="rail-placeholder medium"></div>
+        </div>
+
+        <div class="rail-card">
+          <p class="eyebrow">Empty Module</p>
+          <div class="rail-placeholder short"></div>
+        </div>
+      </aside>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
