@@ -1,2 +1,10 @@
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
 User-agent: *
 Allow: /
+
+Sitemap: https://mathstudywouldyoulearn.netlify.app/sitemap.xml

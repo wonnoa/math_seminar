@@ -3,47 +3,83 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Linear Algebra Journey Map</title>
+    <title>Linear Algebra Study Journey | Session-Based Progress Tracker</title>
     <meta
       name="description"
-      content="A playful linear algebra journey map built from the Strang table of contents, with section-by-section progress tracking."
+      content="Session-based linear algebra study tracker with chapter roadmap, section progress, and study session history based on Gilbert Strang's linear algebra table of contents."
+    />
+    <meta
+      name="robots"
+      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
     />
     <meta name="theme-color" content="#1a2418" />
-    <meta property="og:title" content="Linear Algebra Journey Map" />
+    <link rel="canonical" href="https://mathstudywouldyoulearn.netlify.app/" />
+    <meta property="og:title" content="Linear Algebra Study Journey" />
     <meta
       property="og:description"
-      content="Track linear algebra chapters and sections on a game-like journey map."
+      content="Track linear algebra chapters, study sessions, and section-by-section progress in one session-based study page."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="./social-preview.svg" />
+    <meta property="og:url" content="https://mathstudywouldyoulearn.netlify.app/" />
+    <meta property="og:site_name" content="mathstudywouldyoulearn" />
+    <meta
+      property="og:image"
+      content="https://mathstudywouldyoulearn.netlify.app/social-preview.svg"
+    />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Linear Algebra Journey Map" />
+    <meta name="twitter:title" content="Linear Algebra Study Journey" />
     <meta
       name="twitter:description"
-      content="Track linear algebra chapters and sections on a game-like journey map."
+      content="Track linear algebra chapters, study sessions, and section progress on a single study page."
     />
-    <meta name="twitter:image" content="./social-preview.svg" />
+    <meta
+      name="twitter:image"
+      content="https://mathstudywouldyoulearn.netlify.app/social-preview.svg"
+    />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="./site.webmanifest" />
     <link rel="stylesheet" href="./styles.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Linear Algebra Study Journey",
+        "url": "https://mathstudywouldyoulearn.netlify.app/",
+        "description": "Session-based linear algebra study tracker with chapter roadmap, section progress, and study session history based on Gilbert Strang's linear algebra table of contents.",
+        "inLanguage": "en",
+        "about": ["Linear algebra", "Study sessions", "Progress tracking"],
+        "mainEntity": {
+          "@type": "LearningResource",
+          "name": "Linear Algebra Study Journey",
+          "learningResourceType": ["study guide", "progress tracker", "session log"],
+          "educationalLevel": "undergraduate",
+          "url": "https://mathstudywouldyoulearn.netlify.app/"
+        }
+      }
+    </script>
   </head>
   <body>
     <div class="app-layout">
       <aside class="app-sidebar" aria-label="primary navigation scaffold">
         <div class="sidebar-frame">
           <div class="sidebar-brand">
-            <p class="eyebrow">Primary Rail</p>
-            <h2>Navigation Slots</h2>
+            <p class="eyebrow">Study Navigation</p>
+            <h2>Linear Algebra Hub</h2>
             <p class="sidebar-copy">
-              Leave this column empty for now. It reserves space for the main study menu,
-              identity, and fast-access actions.
+              A single-subject study home for linear algebra chapters, session records, discussion
+              points, and progress tracking.
             </p>
           </div>
 
           <nav class="sidebar-nav">
             <button class="nav-slot nav-slot-labeled" type="button" aria-label="미래 지향">
               <span class="nav-slot-icon"></span>
-              <span class="nav-slot-label">미래 지향</span>
+              <span class="nav-slot-copy">
+                <span class="nav-slot-label">미래 지향</span>
+                <span class="nav-slot-description">
+                  다음 세션에서 다룰 주제, 열어둘 질문, 확장할 아이디어를 모아두는 메뉴
+                </span>
+              </span>
             </button>
             <button class="nav-slot" type="button" aria-label="menu slot 1">
               <span class="nav-slot-icon"></span>
@@ -90,24 +126,24 @@
           </nav>
 
           <div class="sidebar-footnote">
-            <span>Desktop ratio: 4 : 16 : 5</span>
-            <span>Vertical rhythm: 56 px</span>
+            <span>Focus: chapters, sessions, progress</span>
+            <span>Readable text for search and AI crawlers</span>
           </div>
         </div>
       </aside>
 
       <div class="page-shell">
         <header class="blueprint-header">
-          <p class="eyebrow">Phase 3 · Structural Layout Pass</p>
-          <h1>Linear Algebra Journey Map</h1>
+          <p class="eyebrow">Session-Based Linear Algebra Tracker</p>
+          <h1>Linear Algebra Study Journey</h1>
           <p class="header-copy">
-            This pass locks the shell first: a left navigation rail, a center learning canvas, and
-            a right utility rail. Content can change later, but the proportions should stay stable.
+            Follow the chapter roadmap, mark section progress, and connect each study session to
+            the parts of Gilbert Strang's linear algebra book that your group discussed.
           </p>
           <div class="shell-metrics" aria-label="layout ratio summary">
-            <span>left rail 16</span>
-            <span>center canvas 64</span>
-            <span>right rail 20</span>
+            <span>chapter roadmap</span>
+            <span>session history</span>
+            <span>progress tracking</span>
           </div>
         </header>
 
@@ -166,28 +202,40 @@
 
       <aside class="utility-rail" aria-label="future utility widgets">
         <div class="rail-card rail-spec">
-          <p class="eyebrow">Utility Rail</p>
-          <h2>Reserved Space</h2>
+          <p class="eyebrow">Page Summary</p>
+          <h2>What This Site Tracks</h2>
           <div class="ratio-stack">
-            <span>Grid ratio 4 : 16 : 5</span>
-            <span>Sticky side rails on desktop</span>
-            <span>Modules can be filled later</span>
+            <span>Gilbert Strang chapter roadmap</span>
+            <span>Section-by-section study progress</span>
+            <span>Session-based discussion history</span>
           </div>
         </div>
 
         <div class="rail-card">
-          <p class="eyebrow">Empty Module</p>
-          <div class="rail-placeholder tall"></div>
+          <p class="eyebrow">Session Archive</p>
+          <h2>By Study Date</h2>
+          <p class="rail-copy">
+            This area can list study sessions by date, covered chapters, open questions, and the
+            next actions agreed on by the group.
+          </p>
         </div>
 
         <div class="rail-card">
-          <p class="eyebrow">Empty Module</p>
-          <div class="rail-placeholder medium"></div>
+          <p class="eyebrow">Discussion Log</p>
+          <h2>What Was Covered</h2>
+          <p class="rail-copy">
+            Keep a plain-language record of the sections discussed, key definitions, difficult
+            proofs, and the moments where the group got stuck.
+          </p>
         </div>
 
         <div class="rail-card">
-          <p class="eyebrow">Empty Module</p>
-          <div class="rail-placeholder short"></div>
+          <p class="eyebrow">Progress Signals</p>
+          <h2>What Moves Next</h2>
+          <p class="rail-copy">
+            Show what is finished, what is in progress, and what the study group plans to tackle in
+            the next session.
+          </p>
         </div>
       </aside>
     </div>
