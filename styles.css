@@ -26,10 +26,8 @@
   --layout-max: 1720px;
   --layout-gap: clamp(18px, 1.6vw, 26px);
   --nav-min: 216px;
-  --utility-min: 272px;
   --left-fr: 16fr;
-  --center-fr: 64fr;
-  --right-fr: 20fr;
+  --center-fr: 84fr;
 }
 
 * {
@@ -75,8 +73,7 @@ body::after {
   display: grid;
   grid-template-columns:
     minmax(var(--nav-min), var(--left-fr))
-    minmax(0, var(--center-fr))
-    minmax(var(--utility-min), var(--right-fr));
+    minmax(0, var(--center-fr));
   gap: var(--layout-gap);
   width: min(var(--layout-max), calc(100% - 32px));
   margin: 0 auto;
@@ -91,8 +88,7 @@ body::after {
 .blueprint-header,
 .overview-panel,
 .journey-panel,
-.sidebar-frame,
-.rail-card {
+.sidebar-frame {
   border: 1px solid var(--line);
   border-radius: 30px;
   background: var(--panel);
@@ -106,8 +102,7 @@ body::after {
   background: var(--panel-strong);
 }
 
-.app-sidebar,
-.utility-rail {
+.app-sidebar {
   position: sticky;
   top: 16px;
   display: grid;
@@ -121,8 +116,7 @@ body::after {
 .stage-meta,
 .calc-note,
 .topic-count,
-.sidebar-footnote,
-.ratio-stack {
+.sidebar-footnote {
   font-size: 0.72rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -173,14 +167,13 @@ body::after {
   text-transform: uppercase;
 }
 
-.sidebar-frame,
-.rail-card {
+.sidebar-frame {
   padding: 20px;
   background: var(--panel-strong);
 }
 
 .sidebar-brand h2,
-.rail-card h2 {
+.sidebar-frame h2 {
   margin: 8px 0 0;
   font-family: "Iowan Old Style", "Georgia", serif;
   letter-spacing: -0.03em;
@@ -445,38 +438,6 @@ body::after {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-}
-
-.ratio-stack {
-  display: grid;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.rail-copy {
-  margin: 12px 0 0;
-  color: var(--muted);
-  font-size: 0.92rem;
-  line-height: 1.7;
-}
-
-.rail-placeholder {
-  margin-top: 14px;
-  border-radius: 24px;
-  border: 1px dashed rgba(246, 245, 234, 0.12);
-  background: rgba(246, 245, 234, 0.015);
-}
-
-.rail-placeholder.tall {
-  min-height: 210px;
-}
-
-.rail-placeholder.medium {
-  min-height: 160px;
-}
-
-.rail-placeholder.short {
-  min-height: 112px;
 }
 
 .column-ruler {
@@ -848,12 +809,6 @@ body::after {
   .app-layout {
     grid-template-columns: minmax(var(--nav-min), 18fr) minmax(0, 82fr);
   }
-
-  .utility-rail {
-    position: static;
-    padding-top: 0;
-    grid-column: 2;
-  }
 }
 
 @media (max-width: 980px) {
@@ -862,14 +817,9 @@ body::after {
     grid-template-columns: 1fr;
   }
 
-  .app-sidebar,
-  .utility-rail {
+  .app-sidebar {
     position: static;
     padding-top: 0;
-  }
-
-  .utility-rail {
-    grid-column: auto;
   }
 
   .sidebar-nav {
@@ -889,8 +839,7 @@ body::after {
   .journey-panel,
   .blueprint-header,
   .overview-panel,
-  .sidebar-frame,
-  .rail-card {
+  .sidebar-frame {
     border-radius: 24px;
   }
 
