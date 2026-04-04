@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>세션 기록 | 선형대수 스터디 여정</title>
+    <meta
+      name="description"
+      content="날짜별 세션 기록을 모아보는 선형대수 스터디 페이지입니다."
+    />
+    <meta
+      name="robots"
+      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
+    />
+    <link rel="canonical" href="https://mathstudywouldyoulearn.netlify.app/sessions.html" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="./site.webmanifest" />
+    <link rel="stylesheet" href="./styles.css?v=20260404-0015" />
+  </head>
+  <body>
+    <div class="app-layout">
+      <aside class="app-sidebar" aria-label="기본 탐색">
+        <div class="sidebar-frame">
+          <div class="sidebar-brand">
+            <p class="eyebrow">학습 탐색</p>
+            <h2>선형대수 허브</h2>
+          </div>
+
+          <nav class="sidebar-nav">
+            <a class="nav-slot nav-slot-labeled" href="./index.html" aria-label="홈">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">홈</span></span>
+            </a>
+            <a
+              class="nav-slot nav-slot-labeled active"
+              href="./sessions.html"
+              aria-label="세션"
+              aria-current="page"
+            >
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">세션</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./progress.html" aria-label="진행 상황">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">진행 상황</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./future.html" aria-label="미래 지향">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">미래 지향</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./member.html" aria-label="멤버">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">멤버</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./notice.html" aria-label="공지사항">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">공지사항</span></span>
+            </a>
+          </nav>
+        </div>
+      </aside>
+
+      <div class="page-shell">
+        <header class="blueprint-header">
+          <p class="eyebrow">세션 기록</p>
+          <h1>세션</h1>
+        </header>
+
+        <main class="page-stack">
+          <section class="content-panel">
+            <div class="session-board-head">
+              <div>
+                <p class="spec-label">온라인 세션</p>
+                <h2>실시간 세션 기록</h2>
+              </div>
+              <button class="session-button" type="button" data-session-create data-admin-only hidden>새 세션 만들기</button>
+            </div>
+            <p class="session-save-status" data-session-status>온라인 세션을 불러오는 중입니다.</p>
+            <div class="session-list-empty" data-session-empty hidden>아직 등록된 온라인 세션이 없습니다.</div>
+            <ul class="link-list" data-session-list></ul>
+          </section>
+
+          <section class="content-panel">
+            <div class="session-board-head">
+              <div>
+                <p class="spec-label">아카이브</p>
+                <h2>기존 기록</h2>
+              </div>
+            </div>
+            <ul class="link-list">
+              <li>
+                <a class="session-link" href="./session-2026-03-22.html">
+                  <span class="session-date">2026. 03. 22</span>
+                  <h3>벡터공간 점검</h3>
+                  <span class="inline-link">세션 보기</span>
+                </a>
+              </li>
+              <li>
+                <a class="session-link" href="./session-2026-03-15.html">
+                  <span class="session-date">2026. 03. 15</span>
+                  <h3>가우스 소거 복습</h3>
+                  <span class="inline-link">세션 보기</span>
+                </a>
+              </li>
+            </ul>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script type="module" src="./sessions-board.js?v=20260404-0015"></script>
+  </body>
+</html>

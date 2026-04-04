@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Linear Algebra Study Journey | Session-Based Progress Tracker</title>
+    <title>선형대수 스터디 여정 | 세션 기반 진행 추적</title>
     <meta
       name="description"
-      content="Session-based linear algebra study tracker with chapter roadmap, section progress, and study session history based on Gilbert Strang's linear algebra table of contents."
+      content="챕터 로드맵, 섹션별 진행도, 세션 기록을 한눈에 정리하는 선형대수 스터디 페이지입니다."
     />
     <meta
       name="robots"
@@ -14,23 +14,23 @@
     />
     <meta name="theme-color" content="#1a2418" />
     <link rel="canonical" href="https://mathstudywouldyoulearn.netlify.app/" />
-    <meta property="og:title" content="Linear Algebra Study Journey" />
+    <meta property="og:title" content="선형대수 스터디 여정" />
     <meta
       property="og:description"
-      content="Track linear algebra chapters, study sessions, and section-by-section progress in one session-based study page."
+      content="선형대수 챕터, 세션 기록, 섹션별 진행도를 한곳에서 정리하는 스터디 페이지입니다."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://mathstudywouldyoulearn.netlify.app/" />
-    <meta property="og:site_name" content="mathstudywouldyoulearn" />
+    <meta property="og:site_name" content="선형대수 스터디 여정" />
     <meta
       property="og:image"
       content="https://mathstudywouldyoulearn.netlify.app/social-preview.svg"
     />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Linear Algebra Study Journey" />
+    <meta name="twitter:title" content="선형대수 스터디 여정" />
     <meta
       name="twitter:description"
-      content="Track linear algebra chapters, study sessions, and section progress on a single study page."
+      content="선형대수 챕터, 세션 기록, 섹션 진행도를 한곳에서 정리하는 스터디 페이지입니다."
     />
     <meta
       name="twitter:image"
@@ -38,20 +38,20 @@
     />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="./site.webmanifest" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=20260330-0010" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "name": "Linear Algebra Study Journey",
+        "name": "선형대수 스터디 여정",
         "url": "https://mathstudywouldyoulearn.netlify.app/",
-        "description": "Session-based linear algebra study tracker with chapter roadmap, section progress, and study session history based on Gilbert Strang's linear algebra table of contents.",
-        "inLanguage": "en",
-        "about": ["Linear algebra", "Study sessions", "Progress tracking"],
+        "description": "챕터 로드맵, 섹션별 진행도, 세션 기록을 한눈에 정리하는 선형대수 스터디 페이지입니다.",
+        "inLanguage": "ko",
+        "about": ["선형대수", "스터디 세션", "진행 추적"],
         "mainEntity": {
           "@type": "LearningResource",
-          "name": "Linear Algebra Study Journey",
-          "learningResourceType": ["study guide", "progress tracker", "session log"],
+          "name": "선형대수 스터디 여정",
+          "learningResourceType": ["스터디 가이드", "진행 추적", "세션 기록"],
           "educationalLevel": "undergraduate",
           "url": "https://mathstudywouldyoulearn.netlify.app/"
         }
@@ -60,74 +60,44 @@
   </head>
   <body>
     <div class="app-layout">
-      <aside class="app-sidebar" aria-label="primary navigation scaffold">
+      <aside class="app-sidebar" aria-label="기본 탐색">
         <div class="sidebar-frame">
           <div class="sidebar-brand">
-            <p class="eyebrow">Study Navigation</p>
-            <h2>Linear Algebra Hub</h2>
-            <p class="sidebar-copy">
-              A single-subject study home for linear algebra chapters, session records, discussion
-              points, and progress tracking.
-            </p>
+            <p class="eyebrow">학습 탐색</p>
+            <h2>선형대수 허브</h2>
           </div>
 
           <nav class="sidebar-nav">
-            <button class="nav-slot nav-slot-labeled active" type="button" aria-label="홈">
+            <a
+              class="nav-slot nav-slot-labeled active"
+              href="./index.html"
+              aria-label="홈"
+              aria-current="page"
+            >
               <span class="nav-slot-icon"></span>
-              <span class="nav-slot-copy">
-                <span class="nav-slot-label">홈</span>
-                <span class="nav-slot-description">
-                  선형대수 전체 로드맵과 현재 공부 위치를 한 번에 보는 메인 허브
-                </span>
-              </span>
-            </button>
-            <button class="nav-slot nav-slot-labeled" type="button" aria-label="세션">
+              <span class="nav-slot-copy"><span class="nav-slot-label">홈</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./sessions.html" aria-label="세션">
               <span class="nav-slot-icon"></span>
-              <span class="nav-slot-copy">
-                <span class="nav-slot-label">세션</span>
-                <span class="nav-slot-description">
-                  날짜별 스터디 기록, 다룬 범위, 논의 포인트, 다음 할 일을 모아보는 메뉴
-                </span>
-              </span>
-            </button>
-            <button class="nav-slot nav-slot-labeled" type="button" aria-label="진행 상황">
+              <span class="nav-slot-copy"><span class="nav-slot-label">세션</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./progress.html" aria-label="진행 상황">
               <span class="nav-slot-icon"></span>
-              <span class="nav-slot-copy">
-                <span class="nav-slot-label">진행 상황</span>
-                <span class="nav-slot-description">
-                  챕터와 섹션 단위 완료율, 진행중 항목, 아직 시작하지 않은 범위를 추적
-                </span>
-              </span>
-            </button>
-            <button class="nav-slot nav-slot-labeled" type="button" aria-label="미래 지향">
+              <span class="nav-slot-copy"><span class="nav-slot-label">진행 상황</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./future.html" aria-label="미래 지향">
               <span class="nav-slot-icon"></span>
-              <span class="nav-slot-copy">
-                <span class="nav-slot-label">미래 지향</span>
-                <span class="nav-slot-description">
-                  다음 세션에서 다룰 주제, 열어둘 질문, 확장할 아이디어를 모아두는 메뉴
-                </span>
-              </span>
-            </button>
-            <button class="nav-slot" type="button" aria-label="future slot 1">
+              <span class="nav-slot-copy"><span class="nav-slot-label">미래 지향</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./member.html" aria-label="멤버">
               <span class="nav-slot-icon"></span>
-              <span class="nav-slot-lines">
-                <span class="nav-slot-line short"></span>
-                <span class="nav-slot-line"></span>
-              </span>
-            </button>
-            <button class="nav-slot" type="button" aria-label="future slot 2">
+              <span class="nav-slot-copy"><span class="nav-slot-label">멤버</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./notice.html" aria-label="공지사항">
               <span class="nav-slot-icon"></span>
-              <span class="nav-slot-lines">
-                <span class="nav-slot-line short"></span>
-                <span class="nav-slot-line"></span>
-              </span>
-            </button>
+              <span class="nav-slot-copy"><span class="nav-slot-label">공지사항</span></span>
+            </a>
           </nav>
-
-          <div class="sidebar-footnote">
-            <span>Focus: chapters, sessions, progress</span>
-            <span>Readable text for search and AI crawlers</span>
-          </div>
         </div>
       </aside>
 
@@ -135,20 +105,11 @@
         <header class="blueprint-header">
           <div class="hero-layout">
             <div class="hero-copy">
-              <p class="eyebrow">Session-Based Linear Algebra Tracker</p>
-              <h1>Linear Algebra Study Journey</h1>
-              <p class="header-copy">
-                Follow the chapter roadmap, mark section progress, and connect each study session
-                to the parts of Gilbert Strang's linear algebra book that your group discussed.
-              </p>
-              <div class="shell-metrics" aria-label="layout ratio summary">
-                <span>chapter roadmap</span>
-                <span>session history</span>
-                <span>progress tracking</span>
-              </div>
+              <p class="eyebrow">세션 기반 선형대수 추적</p>
+              <h1>선형대수 스터디 여정</h1>
             </div>
 
-            <div class="hero-mascot-stage" aria-label="study mascot stage">
+            <div class="hero-mascot-stage" aria-label="공부 마스코트 영역">
               <div class="hero-mascot-bob">
                 <div class="hero-mascot-tilt">
                   <div class="hero-mascot-bubble" aria-label="공사중 안내">
@@ -159,12 +120,12 @@
                       class="hero-mascot-image is-hidden"
                       id="heroMascotImage"
                       src="./mascot.png"
-                      alt="Animated study mascot"
+                      alt="움직이는 공부 마스코트"
                     />
                     <div class="hero-mascot-placeholder">
-                      <span class="hero-mascot-placeholder-title">Mascot Slot</span>
+                      <span class="hero-mascot-placeholder-title">캐릭터 자리</span>
                       <span class="hero-mascot-placeholder-copy">
-                        Add `mascot.png` to place your animated character here.
+                        `mascot.png`를 넣으면 여기에 캐릭터가 나타납니다.
                       </span>
                     </div>
                   </div>
@@ -175,30 +136,30 @@
           </div>
         </header>
 
-        <section class="overview-panel" aria-label="overall progress overview">
+        <section class="overview-panel" aria-label="전체 진행도 개요">
           <div class="overview-copy">
-            <p class="spec-label">Overall Progress</p>
+            <p class="spec-label">전체 진행도</p>
             <div class="overview-percentline">
               <strong id="overallPercent">0%</strong>
-              <span id="overallPercentCaption">complete</span>
+              <span id="overallPercentCaption">완료</span>
             </div>
-            <p id="overallSummary" class="overview-summary">0 of 0 sections complete</p>
+            <p id="overallSummary" class="overview-summary">전체 0개 섹션 중 0개 완료</p>
             <div class="overview-metrics">
-              <span id="overallDone" class="overview-chip done">0 done</span>
-              <span id="overallDoing" class="overview-chip doing">0 doing</span>
+              <span id="overallDone" class="overview-chip done">0 완료</span>
+              <span id="overallDoing" class="overview-chip doing">0 진행 중</span>
             </div>
           </div>
           <div class="overview-map">
             <div class="overview-map-head">
-              <span>Mini Journey</span>
-              <span id="overallStageSummary">0/0 stages active</span>
+              <span>미니 저니맵</span>
+              <span id="overallStageSummary">0/0 단계 진행 중</span>
             </div>
             <svg
               id="miniJourney"
               class="mini-journey"
               viewBox="0 0 860 190"
               role="img"
-              aria-label="overall progress mini journey map"
+              aria-label="전체 진행도 미니 저니맵"
             ></svg>
           </div>
         </section>
@@ -206,8 +167,8 @@
         <main class="blueprint-stage">
           <section class="journey-panel">
             <div class="panel-topline">
-              <span>Journey Canvas</span>
-              <span id="gridSummary">calculating...</span>
+              <span>저니맵</span>
+              <span id="gridSummary">계산 중...</span>
             </div>
             <div class="column-ruler" aria-hidden="true">
               <span>1</span>
@@ -223,12 +184,12 @@
               <span>11</span>
               <span>12</span>
             </div>
-            <div id="journeyGrid" class="journey-grid" aria-label="journey blueprint canvas"></div>
+            <div id="journeyGrid" class="journey-grid" aria-label="저니맵 캔버스"></div>
           </section>
         </main>
       </div>
     </div>
 
-    <script type="module" src="./app.js"></script>
+    <script type="module" src="./app.js?v=20260330-0010"></script>
   </body>
 </html>

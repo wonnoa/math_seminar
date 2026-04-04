@@ -1,158 +1,150 @@
+import { subscribeAuthState } from "./supabase-auth.js";
+import { fetchSectionProgressMap, saveSectionProgress } from "./supabase-data.js";
+
 const stages = [
-  {
-    id: "preface",
-    label: "P",
-    title: "Preface",
-    page: "iv",
-    side: "left",
-    sections: ["Opening material and book overview"],
-    type: "front",
-    status: "complete",
-    vibe: "Entry gate and orientation",
-  },
   {
     id: "chapter-1",
     label: "1",
-    title: "Matrices and Gaussian Elimination",
+    title: "행렬과 가우스 소거",
     page: "1",
     side: "left",
     sections: [
-      ["1.1", "Introduction", "1"],
-      ["1.2", "The Geometry of Linear Equations", "4"],
-      ["1.3", "An Example of Gaussian Elimination", "13"],
-      ["1.4", "Matrix Notation and Matrix Multiplication", "21"],
-      ["1.5", "Triangular Factors and Row Exchanges", "36"],
-      ["1.6", "Inverses and Transposes", "50"],
-      ["1.7", "Special Matrices and Applications", "66"],
+      ["1.1", "소개", "1"],
+      ["1.2", "선형방정식의 기하학", "4"],
+      ["1.3", "가우스 소거 예제", "13"],
+      ["1.4", "행렬 표기법과 행렬 곱", "21"],
+      ["1.5", "삼각 인수분해와 행 교환", "36"],
+      ["1.6", "역행렬과 전치행렬", "50"],
+      ["1.7", "특수 행렬과 응용", "66"],
     ],
     type: "chapter",
     status: "complete",
-    vibe: "Foundation arc cleared",
+    vibe: "기초 구간 완료",
   },
   {
     id: "chapter-2",
     label: "2",
-    title: "Vector Spaces",
+    title: "벡터공간",
     page: "77",
     side: "right",
     sections: [
-      ["2.1", "Vector Spaces and Subspaces", "77"],
-      ["2.2", "Solving Ax = 0 and Ax = b", "86"],
-      ["2.3", "Linear Independence, Basis, and Dimension", "103"],
-      ["2.4", "The Four Fundamental Subspaces", "115"],
-      ["2.5", "Graphs and Networks", "129"],
-      ["2.6", "Linear Transformations", "140"],
+      ["2.1", "벡터공간과 부분공간", "77"],
+      ["2.2", "Ax = 0과 Ax = b 풀기", "86"],
+      ["2.3", "선형독립, 기저, 차원", "103"],
+      ["2.4", "네 가지 기본 부분공간", "115"],
+      ["2.5", "그래프와 네트워크", "129"],
+      ["2.6", "선형변환", "140"],
     ],
     type: "chapter",
     status: "current",
-    vibe: "Current world: structure and basis",
+    vibe: "현재 구간: 구조와 기저",
   },
   {
     id: "chapter-3",
     label: "3",
-    title: "Orthogonality",
+    title: "직교성",
     page: "159",
     side: "left",
     sections: [
-      ["3.1", "Orthogonal Vectors and Subspaces", "159"],
-      ["3.2", "Cosines and Projections onto Lines", "171"],
-      ["3.3", "Projections and Least Squares", "180"],
-      ["3.4", "Orthogonal Bases and Gram-Schmidt", "195"],
-      ["3.5", "The Fast Fourier Transform", "211"],
+      ["3.1", "직교 벡터와 부분공간", "159"],
+      ["3.2", "코사인과 직선 위로의 사영", "171"],
+      ["3.3", "사영과 최소제곱", "180"],
+      ["3.4", "직교기저와 그람-슈미트", "195"],
+      ["3.5", "빠른 푸리에 변환", "211"],
     ],
     type: "chapter",
     status: "queued",
-    vibe: "Next unlock: geometry and projection",
+    vibe: "다음 구간: 기하와 사영",
   },
   {
     id: "chapter-4",
     label: "4",
-    title: "Determinants",
+    title: "행렬식",
     page: "225",
     side: "right",
     sections: [
-      ["4.1", "Introduction", "225"],
-      ["4.2", "Properties of the Determinant", "227"],
-      ["4.3", "Formulas for the Determinant", "236"],
-      ["4.4", "Applications of Determinants", "247"],
+      ["4.1", "소개", "225"],
+      ["4.2", "행렬식의 성질", "227"],
+      ["4.3", "행렬식 공식", "236"],
+      ["4.4", "행렬식의 응용", "247"],
     ],
     type: "chapter",
     status: "locked",
-    vibe: "Locked until earlier worlds are done",
+    vibe: "앞선 구간을 마치면 열림",
   },
   {
     id: "chapter-5",
     label: "5",
-    title: "Eigenvalues and Eigenvectors",
+    title: "고유값과 고유벡터",
     page: "260",
     side: "left",
     sections: [
-      ["5.1", "Introduction", "260"],
-      ["5.2", "Diagonalization of a Matrix", "273"],
-      ["5.3", "Difference Equations and Powers A^k", "283"],
-      ["5.4", "Differential Equations and e^At", "296"],
-      ["5.5", "Complex Matrices", "312"],
-      ["5.6", "Similarity Transformations", "325"],
+      ["5.1", "소개", "260"],
+      ["5.2", "행렬의 대각화", "273"],
+      ["5.3", "차분방정식과 A^k", "283"],
+      ["5.4", "미분방정식과 e^At", "296"],
+      ["5.5", "복소 행렬", "312"],
+      ["5.6", "닮음변환", "325"],
     ],
     type: "chapter",
     status: "locked",
-    vibe: "Major boss area ahead",
+    vibe: "큰 핵심 구간",
   },
   {
     id: "chapter-6",
     label: "6",
-    title: "Positive Definite Matrices",
+    title: "양의 정부호 행렬",
     page: "345",
     side: "right",
     sections: [
-      ["6.1", "Minima, Maxima, and Saddle Points", "345"],
-      ["6.2", "Tests for Positive Definiteness", "352"],
-      ["6.3", "Singular Value Decomposition", "367"],
-      ["6.4", "Minimum Principles", "376"],
-      ["6.5", "The Finite Element Method", "384"],
+      ["6.1", "극소, 극대, 안장점", "345"],
+      ["6.2", "양의 정부호 판정", "352"],
+      ["6.3", "특잇값 분해", "367"],
+      ["6.4", "최소 원리", "376"],
+      ["6.5", "유한요소법", "384"],
     ],
     type: "chapter",
     status: "locked",
-    vibe: "Optimization route remains locked",
+    vibe: "최적화 구간은 아직 잠김",
   },
   {
     id: "chapter-7",
     label: "7",
-    title: "Computations with Matrices",
+    title: "행렬 계산",
     page: "390",
     side: "left",
     sections: [
-      ["7.1", "Introduction", "390"],
-      ["7.2", "Matrix Norm and Condition Number", "391"],
-      ["7.3", "Computation of Eigenvalues", "399"],
-      ["7.4", "Iterative Methods for Ax = b", "407"],
+      ["7.1", "소개", "390"],
+      ["7.2", "행렬 노름과 조건수", "391"],
+      ["7.3", "고유값 계산", "399"],
+      ["7.4", "Ax = b의 반복법", "407"],
     ],
     type: "chapter",
     status: "locked",
-    vibe: "Computation path opens later",
+    vibe: "계산 구간은 뒤에서 열림",
   },
   {
     id: "chapter-8",
     label: "8",
-    title: "Linear Programming and Game Theory",
+    title: "선형계획법과 게임이론",
     page: "417",
     side: "right",
     sections: [
-      ["8.1", "Linear Inequalities", "417"],
-      ["8.2", "The Simplex Method", "422"],
-      ["8.3", "The Dual Problem", "434"],
-      ["8.4", "Network Models", "444"],
-      ["8.5", "Game Theory", "451"],
+      ["8.1", "선형부등식", "417"],
+      ["8.2", "심플렉스 방법", "422"],
+      ["8.3", "쌍대 문제", "434"],
+      ["8.4", "네트워크 모형", "444"],
+      ["8.5", "게임이론", "451"],
     ],
     type: "chapter",
     status: "locked",
-    vibe: "Late-game strategy zone",
+    vibe: "후반 전략 구간",
   },
 ];
 
-const STORAGE_KEY = "linear-algebra-journey.section-status.v1";
 const STATUS_ORDER = ["not_started", "in_progress", "done"];
-let sectionState = loadSectionState();
+let sectionState = {};
+let isAdmin = false;
 
 const journeyGrid = document.querySelector("#journeyGrid");
 const gridSummary = document.querySelector("#gridSummary");
@@ -171,6 +163,7 @@ const rows = calculateRows(stages);
 journeyGrid.style.gridTemplateRows = `repeat(${rows.totalRows}, var(--row-unit))`;
 setupHeroMascot();
 renderJourney();
+initializeJourney();
 
 function calculateRows(input) {
   let cursor = 2;
@@ -219,7 +212,7 @@ function renderJourney() {
   const totalTracked = stageEntries.reduce((sum, entry) => sum + entry.summary.total, 0);
   const totalDone = stageEntries.reduce((sum, entry) => sum + entry.summary.doneCount, 0);
   const totalDoing = stageEntries.reduce((sum, entry) => sum + entry.summary.inProgressCount, 0);
-  gridSummary.textContent = `${stages.length} stages · ${totalDone}/${totalTracked} sections done`;
+  gridSummary.textContent = `${stages.length}개 단계 · ${totalDone}/${totalTracked}개 섹션 완료`;
   renderOverview(stageEntries, {
     totalTracked,
     totalDone,
@@ -244,7 +237,7 @@ function createCard(stage, summary) {
 
   const meta = document.createElement("div");
   meta.className = "stage-meta";
-  meta.textContent = `${stage.type} · start p.${stage.page}`;
+  meta.textContent = `${stageTypeLabel(stage.type)} · ${stage.page}쪽 시작`;
 
   const status = document.createElement("span");
   status.className = "status-pill";
@@ -272,15 +265,15 @@ function createCard(stage, summary) {
 
   const count = document.createElement("span");
   count.className = "metric-pill topic-count";
-  count.textContent = `${summary.doneCount}/${summary.total} tracked`;
+  count.textContent = `${summary.doneCount}/${summary.total} 완료`;
 
   const height = document.createElement("span");
   height.className = "metric-pill";
-  height.textContent = `${stage.sections.length} items`;
+  height.textContent = `${stage.sections.length}개 항목`;
 
   const calc = document.createElement("div");
   calc.className = "calc-note";
-  calc.textContent = "click a section row to cycle state";
+  calc.textContent = isAdmin ? "섹션 행을 눌러 상태를 바꿉니다" : "읽기 전용으로 표시 중입니다";
 
   footer.append(count, height, calc);
   article.append(head, title, legend, list, footer);
@@ -300,18 +293,23 @@ function createSectionItem(stage, section) {
     const key = getSectionKey(stage.id, code);
     const status = getSectionStatus(key);
     item.classList.add("trackable", status);
-    item.tabIndex = 0;
-    item.setAttribute("role", "button");
-    item.setAttribute("aria-label", `${code} ${title} mark as ${nextStatusLabel(status)}`);
-    item.addEventListener("click", () => {
-      cycleSectionState(key);
-    });
-    item.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
+    if (isAdmin) {
+      item.tabIndex = 0;
+      item.setAttribute("role", "button");
+      item.setAttribute("aria-label", `${code} ${title} ${nextStatusLabel(status)} 상태로 변경`);
+      item.addEventListener("click", () => {
         cycleSectionState(key);
-      }
-    });
+      });
+      item.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          cycleSectionState(key);
+        }
+      });
+    } else {
+      item.classList.add("readonly");
+      item.setAttribute("aria-label", `${code} ${title} ${stateLabel(status) || "미진행"}`);
+    }
   }
 
   const codeEl = document.createElement("span");
@@ -324,11 +322,11 @@ function createSectionItem(stage, section) {
 
   const pageEl = document.createElement("span");
   pageEl.className = "section-page";
-  pageEl.textContent = `p.${page}`;
+  pageEl.textContent = `${page}쪽`;
 
   const statusEl = document.createElement("span");
   statusEl.className = `section-state${reviewOptional ? " optional" : ` ${getSectionStatus(getSectionKey(stage.id, code))}`}`;
-  statusEl.textContent = reviewOptional ? "Optional" : stateLabel(getSectionStatus(getSectionKey(stage.id, code)));
+  statusEl.textContent = reviewOptional ? "선택" : stateLabel(getSectionStatus(getSectionKey(stage.id, code)));
 
   item.append(codeEl, titleEl, pageEl, statusEl);
   return item;
@@ -339,7 +337,7 @@ function createNode(stage, summary) {
   node.className = `stage-node ${summary.status}`;
   node.style.gridColumn = "6 / 8";
   node.style.gridRow = `${stage.nodeRow} / span 1`;
-  node.setAttribute("aria-label", `${stage.title} node`);
+  node.setAttribute("aria-label", `${stage.title} 노드`);
 
   const tag = document.createElement("span");
   tag.className = "node-tag";
@@ -356,43 +354,43 @@ function createNode(stage, summary) {
 function statusLabel(status) {
   switch (status) {
     case "done":
-      return "Done";
+      return "완료";
     case "in_progress":
-      return "In Progress";
+      return "진행 중";
     default:
-      return "Not Started";
+      return "미진행";
   }
 }
 
 function nodeTag(status) {
   switch (status) {
     case "done":
-      return "clear";
+      return "완료";
     case "in_progress":
-      return "doing";
+      return "진행";
     default:
-      return "ready";
+      return "준비";
   }
 }
 
 function legendLabel(summary) {
   if (summary.total === 0) {
-    return "No tracked sections in this stage.";
+    return "이 단계에서 추적 중인 섹션이 없습니다.";
   }
 
   if (summary.doneCount === summary.total) {
-    return `All ${summary.total} tracked sections are complete.`;
+    return `추적 중인 ${summary.total}개 섹션을 모두 마쳤습니다.`;
   }
 
   if (summary.inProgressCount > 0) {
-    return `${summary.doneCount}/${summary.total} complete, ${summary.inProgressCount} in progress.`;
+    return `${summary.total}개 중 ${summary.doneCount}개 완료, ${summary.inProgressCount}개 진행 중입니다.`;
   }
 
   if (summary.doneCount > 0) {
-    return `${summary.doneCount}/${summary.total} complete, the rest not started yet.`;
+    return `${summary.total}개 중 ${summary.doneCount}개 완료, 나머지는 아직 시작 전입니다.`;
   }
 
-  return `${summary.total} tracked sections are not started yet.`;
+  return `추적 중인 ${summary.total}개 섹션이 아직 시작 전입니다.`;
 }
 
 function summarizeStage(stage) {
@@ -425,24 +423,39 @@ function getSectionStatus(key) {
   return sectionState[key] || "not_started";
 }
 
-function cycleSectionState(key) {
+async function cycleSectionState(key) {
+  if (!isAdmin) {
+    return;
+  }
+
   const current = getSectionStatus(key);
   const currentIndex = STATUS_ORDER.indexOf(current);
   const next = STATUS_ORDER[(currentIndex + 1) % STATUS_ORDER.length];
+  const previousState = {
+    ...sectionState,
+  };
+
   sectionState = {
     ...sectionState,
     [key]: next,
   };
-  saveSectionState();
   renderJourney();
+
+  try {
+    await saveSectionProgress(key, next);
+  } catch (error) {
+    sectionState = previousState;
+    renderJourney();
+    window.alert(error?.message ?? "진행 상태를 저장하지 못했습니다.");
+  }
 }
 
 function stateLabel(status) {
   switch (status) {
     case "done":
-      return "Done";
+      return "완료";
     case "in_progress":
-      return "Doing";
+      return "진행 중";
     default:
       return "";
   }
@@ -451,36 +464,12 @@ function stateLabel(status) {
 function nextStatusLabel(status) {
   switch (status) {
     case "not_started":
-      return "in progress";
+      return "진행 중";
     case "in_progress":
-      return "done";
+      return "완료";
     default:
-      return "not started";
+      return "미진행";
   }
-}
-
-function loadSectionState() {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return {};
-    }
-
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") {
-      return {};
-    }
-
-    return Object.fromEntries(
-      Object.entries(parsed).filter((entry) => STATUS_ORDER.includes(entry[1])),
-    );
-  } catch {
-    return {};
-  }
-}
-
-function saveSectionState() {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(sectionState));
 }
 
 function setupHeroMascot() {
@@ -528,11 +517,11 @@ function renderOverview(stageEntries, totals) {
   const activeStages = stageEntries.filter((entry) => entry.summary.status === "in_progress").length;
 
   overallPercent.textContent = `${percent}%`;
-  overallPercentCaption.textContent = "complete";
-  overallSummary.textContent = `${totals.totalDone} of ${totals.totalTracked} tracked sections are complete`;
-  overallDone.textContent = `${totals.totalDone} done`;
-  overallDoing.textContent = `${totals.totalDoing} doing`;
-  overallStageSummary.textContent = `${doneStages}/${stageEntries.length} stages clear · ${activeStages} active`;
+  overallPercentCaption.textContent = "완료";
+  overallSummary.textContent = `전체 ${totals.totalTracked}개 섹션 중 ${totals.totalDone}개 완료`;
+  overallDone.textContent = `${totals.totalDone} 완료`;
+  overallDoing.textContent = `${totals.totalDoing} 진행 중`;
+  overallStageSummary.textContent = `${doneStages}/${stageEntries.length}개 단계 완료 · ${activeStages}개 진행 중`;
 
   renderMiniJourney(stageEntries, travelRatio);
 }
@@ -611,6 +600,10 @@ function renderMiniJourney(stageEntries, progressRatio) {
   });
 }
 
+function stageTypeLabel(type) {
+  return "챕터";
+}
+
 function buildSnakePoints(count, width, height) {
   const maxPerRow = 4;
   const rowsNeeded = Math.ceil(count / maxPerRow);
@@ -664,4 +657,18 @@ function createSvgElement(name, attributes) {
     element.setAttribute(key, value);
   }
   return element;
+}
+
+async function initializeJourney() {
+  subscribeAuthState((authState) => {
+    isAdmin = authState.isAdmin;
+    renderJourney();
+  });
+
+  try {
+    sectionState = await fetchSectionProgressMap();
+    renderJourney();
+  } catch (error) {
+    console.error(error);
+  }
 }
