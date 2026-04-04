@@ -108,6 +108,76 @@ export async function createSessionNote(sessionKey, sessionDate, title = "") {
   return data;
 }
 
+export async function fetchSessionBlockComments(sessionKey) {
+  const { data, error } = await supabase
+    .from("session_block_comments")
+    .select("id, session_key, block_id, parent_id, body, author_email, created_at, updated_at")
+    .eq("session_key", sessionKey)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data ?? [];
+}
+
+export async function createSessionBlockComment(sessionKey, blockId, body, parentId = null) {
+  requireAdmin();
+
+  const authorEmail = getAuthState().user?.email?.toLowerCase() ?? "";
+
+  const { data, error } = await supabase
+    .from("session_block_comments")
+    .insert({
+      session_key: sessionKey,
+      block_id: blockId,
+      parent_id: parentId,
+      body,
+      author_email: authorEmail,
+      updated_at: new Date().toISOString(),
+    })
+    .select("id, session_key, block_id, parent_id, body, author_email, created_at, updated_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function deleteSessionBlockCommentsByBlockIds(sessionKey, blockIds) {
+  requireAdmin();
+
+  if (!Array.isArray(blockIds) || blockIds.length === 0) {
+    return;
+  }
+
+  const { error } = await supabase
+    .from("session_block_comments")
+    .delete()
+    .eq("session_key", sessionKey)
+    .in("block_id", blockIds);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function deleteSessionBlockComment(commentId) {
+  requireAdmin();
+
+  const { error } = await supabase
+    .from("session_block_comments")
+    .delete()
+    .or(`id.eq.${commentId},parent_id.eq.${commentId}`);
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function fetchMembers() {
   const { data, error } = await supabase
     .from("member_cards")

@@ -125,6 +125,20 @@ function buildAuthPanel() {
       <button class="session-button secondary auth-panel-button" type="button" data-auth-action>관리자 로그인</button>
     </div>
     <p class="auth-panel-meta" data-auth-meta>편집 기능은 관리자 로그인 후 사용할 수 있습니다.</p>
+    <form class="auth-login-form" data-auth-form hidden>
+      <label class="auth-field">
+        <span class="auth-field-label">이메일</span>
+        <input class="auth-input" type="email" autocomplete="username" data-auth-email />
+      </label>
+      <label class="auth-field">
+        <span class="auth-field-label">비밀번호</span>
+        <input class="auth-input" type="password" autocomplete="current-password" data-auth-password />
+      </label>
+      <div class="auth-form-actions">
+        <button class="session-button auth-panel-button" type="submit" data-auth-submit>로그인</button>
+        <button class="session-button secondary auth-panel-button" type="button" data-auth-cancel>닫기</button>
+      </div>
+    </form>
   `;
 
   const nav = sidebarFrame.querySelector(".sidebar-nav");
@@ -137,6 +151,32 @@ function buildAuthPanel() {
   const actionButton = panel.querySelector("[data-auth-action]");
   const statusEl = panel.querySelector("[data-auth-status]");
   const metaEl = panel.querySelector("[data-auth-meta]");
+  const form = panel.querySelector("[data-auth-form]");
+  const emailInput = panel.querySelector("[data-auth-email]");
+  const passwordInput = panel.querySelector("[data-auth-password]");
+  const submitButton = panel.querySelector("[data-auth-submit]");
+  const cancelButton = panel.querySelector("[data-auth-cancel]");
+
+  const closeForm = () => {
+    if (!form || !emailInput || !passwordInput) {
+      return;
+    }
+
+    form.hidden = true;
+    emailInput.value = "";
+    passwordInput.value = "";
+  };
+
+  const openForm = () => {
+    if (!form || !emailInput) {
+      return;
+    }
+
+    form.hidden = false;
+    requestAnimationFrame(() => {
+      emailInput.focus();
+    });
+  };
 
   actionButton?.addEventListener("click", async () => {
     const current = getAuthState();
@@ -153,28 +193,43 @@ function buildAuthPanel() {
       return;
     }
 
-    const email = window.prompt("관리자 이메일을 입력하세요.");
-    if (!email) {
-      return;
-    }
+    openForm();
+  });
 
-    const password = window.prompt("비밀번호를 입력하세요.");
-    if (!password) {
+  cancelButton?.addEventListener("click", () => {
+    closeForm();
+  });
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const email = emailInput?.value?.trim();
+    const password = passwordInput?.value ?? "";
+
+    if (!email || !password) {
+      window.alert("이메일과 비밀번호를 입력하세요.");
       return;
     }
 
     try {
       actionButton.disabled = true;
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
       await signInAdmin(email, password);
+      closeForm();
     } catch (error) {
       window.alert(error?.message ?? "로그인하지 못했습니다.");
     } finally {
       actionButton.disabled = false;
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
     }
   });
 
   subscribeAuthState((nextState) => {
-    if (!statusEl || !metaEl || !actionButton) {
+    if (!statusEl || !metaEl || !actionButton || !form) {
       return;
     }
 
@@ -183,6 +238,7 @@ function buildAuthPanel() {
       metaEl.textContent = "관리자 상태를 확인하고 있습니다.";
       actionButton.textContent = "잠시만";
       actionButton.disabled = true;
+      form.hidden = true;
       return;
     }
 
@@ -192,6 +248,7 @@ function buildAuthPanel() {
       statusEl.textContent = "관리자 로그인됨";
       metaEl.textContent = nextState.user?.email ?? "관리자 계정";
       actionButton.textContent = "로그아웃";
+      form.hidden = true;
       return;
     }
 
@@ -199,6 +256,7 @@ function buildAuthPanel() {
       statusEl.textContent = "읽기 전용";
       metaEl.textContent = "로그인은 되었지만 관리자 권한이 없습니다.";
       actionButton.textContent = "관리자 로그인";
+      form.hidden = true;
       return;
     }
 
@@ -206,6 +264,7 @@ function buildAuthPanel() {
       statusEl.textContent = "설정 필요";
       metaEl.textContent = "Supabase 테이블 또는 권한 설정을 먼저 완료해야 합니다.";
       actionButton.textContent = "관리자 로그인";
+      form.hidden = true;
       return;
     }
 

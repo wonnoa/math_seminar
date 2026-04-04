@@ -1,5 +1,12 @@
 import { subscribeAuthState } from "./supabase-auth.js";
-import { fetchSessionNotes, saveSessionNotes } from "./supabase-data.js";
+import {
+  createSessionBlockComment,
+  deleteSessionBlockComment,
+  deleteSessionBlockCommentsByBlockIds,
+  fetchSessionBlockComments,
+  fetchSessionNotes,
+  saveSessionNotes,
+} from "./supabase-data.js";
 
 const initSessionNotes = () => {
   const board = document.querySelector("[data-note-board]");
@@ -19,8 +26,16 @@ const initSessionNotes = () => {
 
   const state = {
     notes: [],
+    blockComments: {},
+    commentDrafts: {},
+    replyDrafts: {},
+    openReplyForms: {},
     isAdmin: false,
   };
+
+  const createId = () =>
+    window.crypto?.randomUUID?.() ??
+    `note-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
   const setStatus = (message) => {
     if (status) {
@@ -28,9 +43,9 @@ const initSessionNotes = () => {
     }
   };
 
-  const resizeTextarea = (textarea) => {
+  const resizeTextarea = (textarea, minHeight = 180) => {
     textarea.style.height = "0px";
-    textarea.style.height = `${Math.max(textarea.scrollHeight, 180)}px`;
+    textarea.style.height = `${Math.max(textarea.scrollHeight, minHeight)}px`;
   };
 
   const readFileAsDataUrl = (file) =>
@@ -72,10 +87,11 @@ const initSessionNotes = () => {
 
   const normalizeBlock = (block) => {
     if (!block || typeof block !== "object") {
-      return { type: "text", text: "", image: "" };
+      return { id: createId(), type: "text", text: "", image: "" };
     }
 
     return {
+      id: block.id ?? createId(),
       type: block.type === "media" ? "media" : "text",
       text: block.text ?? block.content ?? "",
       image: block.image ?? "",
@@ -86,7 +102,7 @@ const initSessionNotes = () => {
     if (typeof note === "string") {
       return {
         title: "",
-        blocks: [{ type: "text", text: note, image: "" }],
+        blocks: [{ id: createId(), type: "text", text: note, image: "" }],
       };
     }
 
@@ -109,8 +125,8 @@ const initSessionNotes = () => {
         title: note.title ?? "",
         blocks: [
           note.image
-            ? { type: "media", text: note.content ?? "", image: note.image ?? "" }
-            : { type: "text", text: note.content ?? "", image: "" },
+            ? { id: createId(), type: "media", text: note.content ?? "", image: note.image ?? "" }
+            : { id: createId(), type: "text", text: note.content ?? "", image: "" },
         ],
       };
     }
@@ -119,6 +135,65 @@ const initSessionNotes = () => {
       title: note.title ?? "",
       blocks: [],
     };
+  };
+
+  const groupCommentsByBlock = (comments) => {
+    const grouped = {};
+
+    for (const comment of comments) {
+      if (!grouped[comment.block_id]) {
+        grouped[comment.block_id] = [];
+      }
+
+      grouped[comment.block_id].push(comment);
+    }
+
+    return grouped;
+  };
+
+  const buildCommentTree = (comments) => {
+    const byId = new Map(
+      comments.map((comment) => [
+        comment.id,
+        {
+          ...comment,
+          children: [],
+        },
+      ]),
+    );
+
+    const roots = [];
+
+    for (const comment of comments) {
+      const node = byId.get(comment.id);
+
+      if (comment.parent_id && byId.has(comment.parent_id)) {
+        byId.get(comment.parent_id).children.push(node);
+      } else {
+        roots.push(node);
+      }
+    }
+
+    return roots;
+  };
+
+  const refreshBlockComments = async () => {
+    try {
+      const comments = await fetchSessionBlockComments(sessionKey);
+      state.blockComments = groupCommentsByBlock(comments);
+    } catch {
+      state.blockComments = {};
+    }
+  };
+
+  const getCommentsForBlock = (blockId) => state.blockComments[blockId] ?? [];
+
+  const formatAuthor = (email) => {
+    if (!email) {
+      return "관리자";
+    }
+
+    return email.split("@")[0] || email;
   };
 
   const createEmptyState = () => {
@@ -134,6 +209,15 @@ const initSessionNotes = () => {
     }
 
     board.appendChild(empty);
+  };
+
+  const persistAllNotes = async (message) => {
+    try {
+      await saveSessionNotes(sessionKey, sessionTitle || document.title, state.notes);
+      setStatus(message ?? `${formatter.format(new Date())}에 온라인 저장소에 저장했습니다.`);
+    } catch (error) {
+      setStatus(error?.message ?? "세션 노트를 저장하지 못했습니다.");
+    }
   };
 
   const addNote = () => {
@@ -166,12 +250,13 @@ const initSessionNotes = () => {
     }
 
     note.blocks.push({
+      id: createId(),
       type,
       text: "",
       image: "",
     });
     render();
-    setStatus(type === "media" ? "사진 블록을 추가했습니다." : "텍스트 블록을 추가했습니다.");
+    setStatus(type === "media" ? "사진 박스를 추가했습니다." : "텍스트 박스를 추가했습니다.");
 
     requestAnimationFrame(() => {
       const textarea = board.querySelector(
@@ -181,18 +266,223 @@ const initSessionNotes = () => {
     });
   };
 
-  const persistAllNotes = async (message) => {
-    try {
-      await saveSessionNotes(sessionKey, sessionTitle || document.title, state.notes);
-      setStatus(message ?? `${formatter.format(new Date())}에 브라우저가 아닌 온라인 저장소에 저장했습니다.`);
-    } catch (error) {
-      setStatus(error?.message ?? "세션 노트를 저장하지 못했습니다.");
+  const deleteBlock = async (noteIndex, blockIndex) => {
+    if (!state.isAdmin) {
+      return;
     }
+
+    const note = state.notes[noteIndex];
+    const block = note?.blocks?.[blockIndex];
+
+    if (!note || !block) {
+      return;
+    }
+
+    note.blocks.splice(blockIndex, 1);
+    delete state.blockComments[block.id];
+    delete state.commentDrafts[block.id];
+
+    render();
+
+    try {
+      await deleteSessionBlockCommentsByBlockIds(sessionKey, [block.id]);
+    } catch (error) {
+      setStatus(error?.message ?? "블록 댓글을 삭제하지 못했습니다.");
+    }
+
+    await persistAllNotes("박스를 삭제했습니다.");
+  };
+
+  const submitComment = async ({ blockId, body, parentId = null }) => {
+    if (!state.isAdmin) {
+      return;
+    }
+
+    const content = body.trim();
+
+    if (!content) {
+      setStatus("댓글 내용을 입력하세요.");
+      return;
+    }
+
+    try {
+      await createSessionBlockComment(sessionKey, blockId, content, parentId);
+
+      if (parentId) {
+        delete state.replyDrafts[parentId];
+        delete state.openReplyForms[parentId];
+      } else {
+        state.commentDrafts[blockId] = "";
+      }
+
+      await refreshBlockComments();
+      render();
+      setStatus(parentId ? "대댓글을 올렸습니다." : "댓글을 올렸습니다.");
+    } catch (error) {
+      setStatus(error?.message ?? "댓글을 저장하지 못했습니다.");
+    }
+  };
+
+  const removeComment = async (commentId) => {
+    if (!state.isAdmin) {
+      return;
+    }
+
+    try {
+      await deleteSessionBlockComment(commentId);
+      delete state.replyDrafts[commentId];
+      delete state.openReplyForms[commentId];
+      await refreshBlockComments();
+      render();
+      setStatus("댓글을 삭제했습니다.");
+    } catch (error) {
+      setStatus(error?.message ?? "댓글을 삭제하지 못했습니다.");
+    }
+  };
+
+  const createCommentComposer = ({
+    className,
+    value,
+    placeholder,
+    submitLabel,
+    onInput,
+    onSubmit,
+    minHeight = 96,
+  }) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = className;
+
+    const textarea = document.createElement("textarea");
+    textarea.className = "note-comment-textarea";
+    textarea.placeholder = placeholder;
+    textarea.value = value;
+    textarea.readOnly = !state.isAdmin;
+
+    textarea.addEventListener("input", (event) => {
+      onInput(event.currentTarget.value);
+      resizeTextarea(event.currentTarget, minHeight);
+    });
+
+    const actions = document.createElement("div");
+    actions.className = "note-comment-composer-actions";
+    actions.dataset.adminOnly = "true";
+    actions.hidden = !state.isAdmin;
+
+    const submitButton = document.createElement("button");
+    submitButton.className = "session-button note-card-button";
+    submitButton.type = "button";
+    submitButton.textContent = submitLabel;
+    submitButton.addEventListener("click", async () => {
+      await onSubmit();
+    });
+
+    actions.appendChild(submitButton);
+    wrapper.append(textarea, actions);
+
+    requestAnimationFrame(() => resizeTextarea(textarea, minHeight));
+
+    return wrapper;
+  };
+
+  const createCommentCard = (comment, depth = 0) => {
+    const card = document.createElement("article");
+    card.className = "note-comment-card";
+    card.style.setProperty("--comment-depth", String(depth));
+
+    const meta = document.createElement("div");
+    meta.className = "note-comment-meta";
+
+    const author = document.createElement("strong");
+    author.className = "note-comment-author";
+    author.textContent = formatAuthor(comment.author_email);
+
+    const time = document.createElement("span");
+    time.className = "note-comment-time";
+    time.textContent = formatter.format(new Date(comment.updated_at || comment.created_at));
+
+    meta.append(author, time);
+
+    const body = document.createElement("div");
+    body.className = "note-comment-body";
+    body.textContent = comment.body;
+
+    const actions = document.createElement("div");
+    actions.className = "note-comment-actions";
+    actions.dataset.adminOnly = "true";
+    actions.hidden = !state.isAdmin;
+
+    const replyButton = document.createElement("button");
+    replyButton.className = "session-button secondary note-card-button";
+    replyButton.type = "button";
+    replyButton.textContent = state.openReplyForms[comment.id] ? "답글 닫기" : "답글";
+    replyButton.addEventListener("click", () => {
+      state.openReplyForms[comment.id] = !state.openReplyForms[comment.id];
+      render();
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "session-button secondary note-card-button note-block-delete";
+    deleteButton.type = "button";
+    deleteButton.textContent = "댓글 삭제";
+    deleteButton.addEventListener("click", async () => {
+      await removeComment(comment.id);
+    });
+
+    actions.append(replyButton, deleteButton);
+    card.append(meta, body, actions);
+
+    if (state.isAdmin && state.openReplyForms[comment.id]) {
+      const replyComposer = createCommentComposer({
+        className: "note-comment-reply-composer",
+        value: state.replyDrafts[comment.id] ?? "",
+        placeholder: "대댓글을 입력하세요.",
+        submitLabel: "대댓글 올리기",
+        onInput: (value) => {
+          state.replyDrafts[comment.id] = value;
+        },
+        onSubmit: async () => {
+          await submitComment({
+            blockId: comment.block_id,
+            body: state.replyDrafts[comment.id] ?? "",
+            parentId: comment.id,
+          });
+        },
+        minHeight: 84,
+      });
+
+      card.appendChild(replyComposer);
+    }
+
+    if (comment.children.length > 0) {
+      const children = document.createElement("div");
+      children.className = "note-comment-children";
+      comment.children.forEach((child) => {
+        children.appendChild(createCommentCard(child, depth + 1));
+      });
+      card.appendChild(children);
+    }
+
+    return card;
   };
 
   const createTextBlock = (block, noteIndex, blockIndex) => {
     const wrapper = document.createElement("div");
     wrapper.className = "note-block note-block-text";
+
+    const actions = document.createElement("div");
+    actions.className = "note-block-actions";
+    actions.dataset.adminOnly = "true";
+    actions.hidden = !state.isAdmin;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "session-button secondary note-card-button note-block-delete";
+    deleteButton.type = "button";
+    deleteButton.textContent = "박스 삭제";
+    deleteButton.addEventListener("click", async () => {
+      await deleteBlock(noteIndex, blockIndex);
+    });
+
+    actions.appendChild(deleteButton);
 
     const textarea = document.createElement("textarea");
     textarea.className = "note-textarea note-block-textarea";
@@ -210,7 +500,7 @@ const initSessionNotes = () => {
       setStatus("저장되지 않은 변경사항이 있습니다.");
     });
 
-    wrapper.appendChild(textarea);
+    wrapper.append(actions, textarea);
     return { wrapper, textarea };
   };
 
@@ -306,39 +596,106 @@ const initSessionNotes = () => {
         setStatus("저장되지 않은 변경사항이 있습니다.");
       });
 
-      overlay.appendChild(removeButton);
-      overlay.appendChild(uploadInput);
-
-      const preview = mediaPane.querySelector(".note-image-preview");
-      preview?.appendChild(overlay);
+      overlay.append(removeButton, uploadInput);
+      mediaPane.querySelector(".note-image-preview")?.appendChild(overlay);
     } else {
       mediaActions.append(uploadButton, uploadInput);
       mediaPane.appendChild(mediaActions);
     }
 
-    const textPane = document.createElement("div");
-    textPane.className = "note-editor-pane";
+    const commentPane = document.createElement("div");
+    commentPane.className = "note-editor-pane";
 
-    const textarea = document.createElement("textarea");
-    textarea.className = "note-textarea note-block-textarea";
-    textarea.placeholder = "사진 옆에 메모를 적으세요.";
-    textarea.value = block.text ?? "";
-    textarea.readOnly = !state.isAdmin;
-    textarea.dataset.noteIndex = String(noteIndex);
-    textarea.dataset.blockIndex = String(blockIndex);
+    const blockActions = document.createElement("div");
+    blockActions.className = "note-block-actions";
+    blockActions.dataset.adminOnly = "true";
+    blockActions.hidden = !state.isAdmin;
 
-    textarea.addEventListener("input", (event) => {
-      const currentNoteIndex = Number(event.currentTarget.dataset.noteIndex);
-      const currentBlockIndex = Number(event.currentTarget.dataset.blockIndex);
-      state.notes[currentNoteIndex].blocks[currentBlockIndex].text = event.currentTarget.value;
-      resizeTextarea(event.currentTarget);
-      setStatus("저장되지 않은 변경사항이 있습니다.");
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "session-button secondary note-card-button note-block-delete";
+    deleteButton.type = "button";
+    deleteButton.textContent = "박스 삭제";
+    deleteButton.addEventListener("click", async () => {
+      await deleteBlock(noteIndex, blockIndex);
     });
 
-    textPane.appendChild(textarea);
-    wrapper.append(mediaPane, textPane);
+    blockActions.appendChild(deleteButton);
+    commentPane.appendChild(blockActions);
 
-    return { wrapper, textarea };
+    const thread = document.createElement("div");
+    thread.className = "note-comment-thread";
+
+    const blockComments = getCommentsForBlock(block.id);
+    const commentTree = buildCommentTree(blockComments);
+    const hasLegacyMemo = !blockComments.length && Boolean(block.text?.trim());
+
+    if (hasLegacyMemo) {
+      const legacy = document.createElement("article");
+      legacy.className = "note-comment-card note-comment-legacy";
+
+      const meta = document.createElement("div");
+      meta.className = "note-comment-meta";
+
+      const author = document.createElement("strong");
+      author.className = "note-comment-author";
+      author.textContent = "기존 메모";
+
+      meta.appendChild(author);
+
+      const body = document.createElement("div");
+      body.className = "note-comment-body";
+      body.textContent = block.text;
+
+      legacy.append(meta, body);
+      thread.appendChild(legacy);
+    }
+
+    if (commentTree.length === 0 && !hasLegacyMemo) {
+      const empty = document.createElement("div");
+      empty.className = "note-comment-empty";
+      empty.innerHTML = `
+        <strong>아직 댓글이 없습니다</strong>
+        <span>${state.isAdmin ? "이 블록에 첫 댓글을 남겨보세요." : "새로고침하면 새 댓글을 볼 수 있습니다."}</span>
+      `;
+      thread.appendChild(empty);
+    } else {
+      commentTree.forEach((comment) => {
+        thread.appendChild(createCommentCard(comment));
+      });
+    }
+
+    commentPane.appendChild(thread);
+
+    if (state.isAdmin) {
+      const composer = createCommentComposer({
+        className: "note-comment-composer",
+        value: state.commentDrafts[block.id] ?? "",
+        placeholder: "이 사진 블록에 댓글을 남기세요.",
+        submitLabel: "댓글 올리기",
+        onInput: (value) => {
+          state.commentDrafts[block.id] = value;
+        },
+        onSubmit: async () => {
+          await submitComment({
+            blockId: block.id,
+            body: state.commentDrafts[block.id] ?? "",
+          });
+        },
+        minHeight: 96,
+      });
+
+      commentPane.appendChild(composer);
+    }
+
+    const stubTextarea = document.createElement("textarea");
+    stubTextarea.className = "note-textarea note-block-textarea note-textarea-stub";
+    stubTextarea.tabIndex = -1;
+    stubTextarea.setAttribute("aria-hidden", "true");
+    stubTextarea.value = "";
+
+    wrapper.append(mediaPane, commentPane);
+
+    return { wrapper, textarea: stubTextarea };
   };
 
   const createNoteCard = (note, noteIndex) => {
@@ -385,8 +742,22 @@ const initSessionNotes = () => {
     deleteButton.dataset.noteIndex = String(noteIndex);
     deleteButton.addEventListener("click", async (event) => {
       const currentNoteIndex = Number(event.currentTarget.dataset.noteIndex);
+      const deletedNote = state.notes[currentNoteIndex];
+      const deletedBlockIds = (deletedNote?.blocks ?? []).map((block) => block.id).filter(Boolean);
+
       state.notes.splice(currentNoteIndex, 1);
+      deletedBlockIds.forEach((blockId) => {
+        delete state.blockComments[blockId];
+        delete state.commentDrafts[blockId];
+      });
       render();
+
+      try {
+        await deleteSessionBlockCommentsByBlockIds(sessionKey, deletedBlockIds);
+      } catch (error) {
+        setStatus(error?.message ?? "노트 댓글을 삭제하지 못했습니다.");
+      }
+
       await persistAllNotes(state.notes.length === 0 ? "노트를 비웠습니다." : "노트를 삭제했습니다.");
     });
 
@@ -470,6 +841,7 @@ const initSessionNotes = () => {
     try {
       const payload = await fetchSessionNotes(sessionKey);
       state.notes = Array.isArray(payload?.notes) ? payload.notes.map(normalizeNote) : [];
+      await refreshBlockComments();
       render();
 
       if (payload?.updated_at) {

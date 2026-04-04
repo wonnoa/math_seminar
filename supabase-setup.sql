@@ -1,5 +1,13 @@
 create extension if not exists pgcrypto;
 
+create table if not exists public.admin_emails (
+  email text primary key,
+  created_at timestamptz not null default now(),
+  check (email = lower(email))
+);
+
+alter table public.admin_emails enable row level security;
+
 create or replace function public.is_admin()
 returns boolean
 language sql
@@ -11,14 +19,6 @@ as $$
     where email = lower(coalesce(auth.jwt() ->> 'email', ''))
   );
 $$;
-
-create table if not exists public.admin_emails (
-  email text primary key,
-  created_at timestamptz not null default now(),
-  check (email = lower(email))
-);
-
-alter table public.admin_emails enable row level security;
 
 drop policy if exists "admin_emails_select_self" on public.admin_emails;
 create policy "admin_emails_select_self"
@@ -70,6 +70,34 @@ using (true);
 drop policy if exists "session_notes_admin_write" on public.session_notes;
 create policy "session_notes_admin_write"
 on public.session_notes
+for all
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+create table if not exists public.session_block_comments (
+  id uuid primary key default gen_random_uuid(),
+  session_key text not null references public.session_notes(session_key) on delete cascade,
+  block_id text not null,
+  parent_id uuid references public.session_block_comments(id) on delete cascade,
+  body text not null default '',
+  author_email text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.session_block_comments enable row level security;
+
+drop policy if exists "session_block_comments_public_read" on public.session_block_comments;
+create policy "session_block_comments_public_read"
+on public.session_block_comments
+for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "session_block_comments_admin_write" on public.session_block_comments;
+create policy "session_block_comments_admin_write"
+on public.session_block_comments
 for all
 to authenticated
 using (public.is_admin())
