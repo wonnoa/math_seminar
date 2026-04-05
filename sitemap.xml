@@ -1,55 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://mathstudywouldyoulearn.netlify.app/</loc>
+    <loc>https://mathlearn.wonnoa91.workers.dev/</loc>
     <lastmod>2026-03-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://mathstudywouldyoulearn.netlify.app/sessions.html</loc>
+    <loc>https://mathlearn.wonnoa91.workers.dev/sessions</loc>
     <lastmod>2026-03-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://mathstudywouldyoulearn.netlify.app/progress.html</loc>
+    <loc>https://mathlearn.wonnoa91.workers.dev/progress</loc>
     <lastmod>2026-03-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://mathstudywouldyoulearn.netlify.app/future.html</loc>
+    <loc>https://mathlearn.wonnoa91.workers.dev/future</loc>
     <lastmod>2026-03-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://mathstudywouldyoulearn.netlify.app/member.html</loc>
+    <loc>https://mathlearn.wonnoa91.workers.dev/member</loc>
     <lastmod>2026-03-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://mathstudywouldyoulearn.netlify.app/notice.html</loc>
+    <loc>https://mathlearn.wonnoa91.workers.dev/notice</loc>
     <lastmod>2026-03-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://mathstudywouldyoulearn.netlify.app/session-2026-03-22.html</loc>
+    <loc>https://mathlearn.wonnoa91.workers.dev/session-2026-03-22.html</loc>
     <lastmod>2026-03-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://mathstudywouldyoulearn.netlify.app/session-2026-03-29.html</loc>
+    <loc>https://mathlearn.wonnoa91.workers.dev/session-2026-03-29.html</loc>
     <lastmod>2026-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://mathstudywouldyoulearn.netlify.app/session-2026-03-15.html</loc>
+    <loc>https://mathlearn.wonnoa91.workers.dev/session-2026-03-15.html</loc>
     <lastmod>2026-03-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
