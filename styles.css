@@ -472,11 +472,44 @@ body::after {
 }
 
 .nav-slot-icon {
+  display: grid;
+  place-items: center;
   width: 34px;
   height: 34px;
   border-radius: 12px;
   border: 1px solid rgba(246, 245, 234, 0.08);
   background: rgba(246, 245, 234, 0.025);
+  overflow: hidden;
+}
+
+.nav-slot-icon::before {
+  content: "•";
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.nav-slot[aria-label="홈"] .nav-slot-icon::before {
+  content: "🏠";
+}
+
+.nav-slot[aria-label="세션"] .nav-slot-icon::before {
+  content: "🗂️";
+}
+
+.nav-slot[aria-label="진행 상황"] .nav-slot-icon::before {
+  content: "📈";
+}
+
+.nav-slot[aria-label="미래 지향"] .nav-slot-icon::before {
+  content: "🚀";
+}
+
+.nav-slot[aria-label="멤버"] .nav-slot-icon::before {
+  content: "👥";
+}
+
+.nav-slot[aria-label="공지사항"] .nav-slot-icon::before {
+  content: "📢";
 }
 
 .nav-slot-lines {
