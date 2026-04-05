@@ -1,5 +1,5 @@
-import { subscribeAuthState } from "./supabase-auth.js?v=20260405-0315";
-import { deleteNotice, fetchNotices, saveNotice } from "./supabase-data.js?v=20260405-0315";
+import { subscribeAuthState } from "./supabase-auth.js?v=20260406-0035";
+import { deleteNotice, fetchNotices, saveNotice } from "./supabase-data.js?v=20260406-0035";
 
 const initNoticeBoard = () => {
   const board = document.querySelector("[data-notice-board]");
@@ -14,11 +14,18 @@ const initNoticeBoard = () => {
     dateStyle: "medium",
     timeStyle: "short",
   });
+  const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   const today = new Date().toISOString().slice(0, 10);
   const state = {
     notices: [],
     isAdmin: false,
+    canManageNotices: false,
+    openEditorId: "",
   };
 
   const setStatus = (message) => {
@@ -68,10 +75,10 @@ const initNoticeBoard = () => {
     empty.className = "notice-empty";
     empty.innerHTML = `
       <strong>아직 날짜별 공지가 없습니다</strong>
-      <span>${state.isAdmin ? "새 공지를 만들어 세션별 안내를 쌓아두세요." : "관리자가 등록한 공지가 여기에 표시됩니다."}</span>
+      <span>${state.canManageNotices ? "새 공지를 만들어 세션별 안내를 쌓아두세요." : "관리자가 등록한 공지가 여기에 표시됩니다."}</span>
     `;
 
-    if (state.isAdmin) {
+    if (state.canManageNotices) {
       empty.addEventListener("click", addNotice);
     }
 
@@ -79,25 +86,23 @@ const initNoticeBoard = () => {
   };
 
   const addNotice = () => {
-    if (!state.isAdmin) {
+    if (!state.canManageNotices) {
       return;
     }
 
+    const id = crypto.randomUUID();
+
     state.notices.push({
-      id: crypto.randomUUID(),
+      id,
       date: today,
       title: "",
       body: "",
       savedAt: "",
     });
+    state.openEditorId = id;
     sortNotices();
     render();
     setStatus("새 날짜별 공지를 만들었습니다.");
-
-    requestAnimationFrame(() => {
-      const firstInput = board.querySelector(".notice-card:first-child .notice-title");
-      firstInput?.focus();
-    });
   };
 
   const createNoticeCard = (notice, index) => {
@@ -116,7 +121,7 @@ const initNoticeBoard = () => {
     dateInput.type = "date";
     dateInput.value = notice.date;
     dateInput.dataset.noticeIndex = String(index);
-    dateInput.readOnly = !state.isAdmin;
+    dateInput.readOnly = !state.canManageNotices;
     dateInput.addEventListener("input", (event) => {
       const currentIndex = Number(event.currentTarget.dataset.noticeIndex);
       state.notices[currentIndex].date = event.currentTarget.value || today;
@@ -129,7 +134,7 @@ const initNoticeBoard = () => {
     titleInput.placeholder = "공지 제목";
     titleInput.value = notice.title;
     titleInput.dataset.noticeIndex = String(index);
-    titleInput.readOnly = !state.isAdmin;
+    titleInput.readOnly = !state.canManageNotices;
     titleInput.addEventListener("input", (event) => {
       const currentIndex = Number(event.currentTarget.dataset.noticeIndex);
       state.notices[currentIndex].title = event.currentTarget.value;
@@ -140,8 +145,7 @@ const initNoticeBoard = () => {
 
     const actions = document.createElement("div");
     actions.className = "notice-card-actions";
-    actions.dataset.adminOnly = "true";
-    actions.hidden = !state.isAdmin;
+    actions.hidden = !state.canManageNotices;
 
     const saveButton = document.createElement("button");
     saveButton.className = "session-button note-card-button";
@@ -170,6 +174,9 @@ const initNoticeBoard = () => {
     deleteButton.addEventListener("click", async (event) => {
       const currentIndex = Number(event.currentTarget.dataset.noticeIndex);
       const current = state.notices[currentIndex];
+      if (state.openEditorId === current.id) {
+        state.openEditorId = "";
+      }
       state.notices.splice(currentIndex, 1);
       sortNotices();
       render();
@@ -190,7 +197,7 @@ const initNoticeBoard = () => {
     body.placeholder = "공지 내용을 적으세요.";
     body.value = notice.body;
     body.dataset.noticeIndex = String(index);
-    body.readOnly = !state.isAdmin;
+    body.readOnly = !state.canManageNotices;
     body.addEventListener("input", (event) => {
       const currentIndex = Number(event.currentTarget.dataset.noticeIndex);
       state.notices[currentIndex].body = event.currentTarget.value;
@@ -202,7 +209,7 @@ const initNoticeBoard = () => {
     meta.className = "notice-card-meta";
     meta.textContent = notice.savedAt
       ? `마지막 저장 ${formatter.format(new Date(notice.savedAt))}`
-      : state.isAdmin
+      : state.canManageNotices
         ? "아직 저장되지 않았습니다."
         : "게시 준비 중";
 
@@ -211,9 +218,69 @@ const initNoticeBoard = () => {
     return card;
   };
 
+  const toNoticeHref = (notice) => {
+    const params = new URLSearchParams({ id: notice.id });
+    return `./notice-post.html?${params.toString()}`;
+  };
+
+  const createNoticeListItem = (notice, index) => {
+    const card = document.createElement("article");
+    card.className = "notice-list-card";
+    card.dataset.noticeIndex = String(index);
+
+    const link = document.createElement("a");
+    link.className = "notice-list-link";
+    link.href = toNoticeHref(notice);
+
+    const meta = document.createElement("div");
+    meta.className = "notice-list-meta";
+    meta.textContent = dateFormatter.format(new Date(`${notice.date}T00:00:00`));
+
+    const title = document.createElement("h3");
+    title.className = "notice-list-title";
+    title.textContent = notice.title || "제목 없는 공지";
+
+    const excerpt = document.createElement("p");
+    excerpt.className = "notice-list-excerpt";
+    excerpt.textContent = (notice.body || "내용이 아직 없습니다.").replace(/\s+/g, " ").trim().slice(0, 120);
+
+    const enter = document.createElement("span");
+    enter.className = "inline-link";
+    enter.textContent = "공지 보기";
+
+    link.append(meta, title, excerpt, enter);
+    card.appendChild(link);
+
+    if (state.canManageNotices) {
+      const isOpen = state.openEditorId === notice.id;
+      const actions = document.createElement("div");
+      actions.className = "notice-list-actions";
+
+      const editButton = document.createElement("button");
+      editButton.className = "session-button secondary note-card-button";
+      editButton.type = "button";
+      editButton.textContent = isOpen ? "수정 닫기" : "펼쳐서 수정";
+
+      actions.appendChild(editButton);
+      card.appendChild(actions);
+
+      const editor = createNoticeCard(notice, index);
+      editor.classList.add("notice-inline-editor");
+      editor.hidden = !isOpen;
+      card.appendChild(editor);
+
+      editButton.addEventListener("click", () => {
+        state.openEditorId = state.openEditorId === notice.id ? "" : notice.id;
+        render();
+      });
+    }
+
+    return card;
+  };
+
   const render = () => {
     board.innerHTML = "";
-    createButton.hidden = !state.isAdmin;
+    createButton.hidden = !state.canManageNotices;
 
     if (state.notices.length === 0) {
       createEmptyState();
@@ -222,7 +289,7 @@ const initNoticeBoard = () => {
 
     sortNotices();
     state.notices.forEach((notice, index) => {
-      board.appendChild(createNoticeCard(notice, index));
+      board.appendChild(createNoticeListItem(notice, index));
     });
   };
 
@@ -248,6 +315,7 @@ const initNoticeBoard = () => {
 
   subscribeAuthState((authState) => {
     state.isAdmin = authState.isAdmin;
+    state.canManageNotices = authState.isAdmin || authState.canManageNotices;
     render();
   });
 

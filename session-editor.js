@@ -6,7 +6,8 @@ import {
   fetchSessionBlockComments,
   fetchSessionNotes,
   saveSessionNotes,
-} from "./supabase-data.js?v=20260405-0315";
+  updateSessionBlockComment,
+} from "./supabase-data.js?v=20260405-0725";
 
 const initSessionNotes = () => {
   const board = document.querySelector("[data-note-board]");
@@ -29,7 +30,9 @@ const initSessionNotes = () => {
     blockComments: {},
     commentDrafts: {},
     replyDrafts: {},
+    commentEditDrafts: {},
     openReplyForms: {},
+    openEditForms: {},
     isAdmin: false,
     canComment: false,
     userEmail: "",
@@ -198,6 +201,13 @@ const initSessionNotes = () => {
     return email.split("@")[0] || email;
   };
 
+  const isOwnComment = (comment) =>
+    Boolean(state.userEmail) && comment.author_email?.toLowerCase() === state.userEmail;
+
+  const canEditComment = (comment) => state.isAdmin || (canWriteComments() && isOwnComment(comment));
+
+  const canDeleteComment = (comment) => state.isAdmin || (canWriteComments() && isOwnComment(comment));
+
   const createEmptyState = () => {
     const empty = document.createElement("div");
     empty.className = "note-empty";
@@ -285,6 +295,10 @@ const initSessionNotes = () => {
     note.blocks.splice(blockIndex, 1);
     delete state.blockComments[block.id];
     delete state.commentDrafts[block.id];
+    state.replyDrafts = {};
+    state.openReplyForms = {};
+    state.commentEditDrafts = {};
+    state.openEditForms = {};
 
     render();
 
@@ -328,12 +342,14 @@ const initSessionNotes = () => {
   };
 
   const removeComment = async (commentId) => {
-    if (!state.isAdmin) {
+    if (!canWriteComments()) {
       return;
     }
 
     try {
       await deleteSessionBlockComment(commentId);
+      delete state.commentEditDrafts[commentId];
+      delete state.openEditForms[commentId];
       delete state.replyDrafts[commentId];
       delete state.openReplyForms[commentId];
       await refreshBlockComments();
@@ -341,6 +357,30 @@ const initSessionNotes = () => {
       setStatus("댓글을 삭제했습니다.");
     } catch (error) {
       setStatus(error?.message ?? "댓글을 삭제하지 못했습니다.");
+    }
+  };
+
+  const editComment = async (comment) => {
+    if (!canEditComment(comment)) {
+      return;
+    }
+
+    const content = (state.commentEditDrafts[comment.id] ?? "").trim();
+
+    if (!content) {
+      setStatus("댓글 내용을 입력하세요.");
+      return;
+    }
+
+    try {
+      await updateSessionBlockComment(comment.id, content);
+      delete state.commentEditDrafts[comment.id];
+      delete state.openEditForms[comment.id];
+      await refreshBlockComments();
+      render();
+      setStatus("댓글을 수정했습니다.");
+    } catch (error) {
+      setStatus(error?.message ?? "댓글을 수정하지 못했습니다.");
     }
   };
 
@@ -411,14 +451,31 @@ const initSessionNotes = () => {
 
     const actions = document.createElement("div");
     actions.className = "note-comment-actions";
-    actions.hidden = !(canWriteComments() || state.isAdmin);
+    actions.hidden = !(canWriteComments() || canEditComment(comment) || canDeleteComment(comment));
 
     const replyButton = document.createElement("button");
     replyButton.className = "session-button secondary note-card-button";
     replyButton.type = "button";
     replyButton.textContent = state.openReplyForms[comment.id] ? "답글 닫기" : "답글";
     replyButton.addEventListener("click", () => {
+      delete state.openEditForms[comment.id];
       state.openReplyForms[comment.id] = !state.openReplyForms[comment.id];
+      render();
+    });
+
+    const editButton = document.createElement("button");
+    editButton.className = "session-button secondary note-card-button";
+    editButton.type = "button";
+    editButton.textContent = state.openEditForms[comment.id] ? "수정 닫기" : "수정";
+    editButton.addEventListener("click", () => {
+      delete state.openReplyForms[comment.id];
+      state.commentEditDrafts[comment.id] = state.commentEditDrafts[comment.id] ?? comment.body;
+      state.openEditForms[comment.id] = !state.openEditForms[comment.id];
+
+      if (!state.openEditForms[comment.id]) {
+        delete state.commentEditDrafts[comment.id];
+      }
+
       render();
     });
 
@@ -427,6 +484,10 @@ const initSessionNotes = () => {
     deleteButton.type = "button";
     deleteButton.textContent = "댓글 삭제";
     deleteButton.addEventListener("click", async () => {
+      if (!state.isAdmin && comment.children.length > 0) {
+        setStatus("답글이 달린 댓글은 삭제할 수 없습니다.");
+        return;
+      }
       await removeComment(comment.id);
     });
 
@@ -434,11 +495,56 @@ const initSessionNotes = () => {
       actions.appendChild(replyButton);
     }
 
-    if (state.isAdmin) {
+    if (canEditComment(comment)) {
+      actions.appendChild(editButton);
+    }
+
+    if (canDeleteComment(comment)) {
       actions.appendChild(deleteButton);
     }
 
     card.append(meta, body, actions);
+
+    if (canEditComment(comment) && state.openEditForms[comment.id]) {
+      const editComposer = document.createElement("div");
+      editComposer.className = "note-comment-reply-composer";
+
+      const textarea = document.createElement("textarea");
+      textarea.className = "note-comment-textarea";
+      textarea.value = state.commentEditDrafts[comment.id] ?? comment.body;
+      textarea.placeholder = "댓글을 수정하세요.";
+      textarea.addEventListener("input", (event) => {
+        state.commentEditDrafts[comment.id] = event.currentTarget.value;
+        resizeTextarea(event.currentTarget, 60);
+      });
+
+      const editActions = document.createElement("div");
+      editActions.className = "note-comment-composer-actions";
+
+      const saveEditButton = document.createElement("button");
+      saveEditButton.className = "session-button note-card-button";
+      saveEditButton.type = "button";
+      saveEditButton.textContent = "수정 저장";
+      saveEditButton.addEventListener("click", async () => {
+        await editComment(comment);
+      });
+
+      const cancelEditButton = document.createElement("button");
+      cancelEditButton.className = "session-button secondary note-card-button";
+      cancelEditButton.type = "button";
+      cancelEditButton.textContent = "취소";
+      cancelEditButton.addEventListener("click", () => {
+        delete state.commentEditDrafts[comment.id];
+        delete state.openEditForms[comment.id];
+        render();
+      });
+
+      editActions.append(saveEditButton, cancelEditButton);
+      editComposer.append(textarea, editActions);
+      card.appendChild(editComposer);
+
+      requestAnimationFrame(() => resizeTextarea(textarea, 60));
+    }
 
     if (canWriteComments() && state.openReplyForms[comment.id]) {
       const replyComposer = createCommentComposer({

@@ -13,12 +13,15 @@ create table if not exists public.user_permissions (
   is_admin boolean not null default false,
   can_comment boolean not null default false,
   can_manage_member_card boolean not null default false,
+  can_manage_notices boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   check (email = lower(email))
 );
 
 alter table public.user_permissions enable row level security;
+alter table public.user_permissions
+  add column if not exists can_manage_notices boolean not null default false;
 
 create or replace function public.is_admin()
 returns boolean
@@ -63,6 +66,20 @@ as $$
     from public.user_permissions
     where email = lower(coalesce(auth.jwt() ->> 'email', ''))
       and can_manage_member_card = true
+  );
+$$;
+
+create or replace function public.can_manage_notices()
+returns boolean
+language sql
+stable
+as $$
+  select public.is_admin()
+  or exists (
+    select 1
+    from public.user_permissions
+    where email = lower(coalesce(auth.jwt() ->> 'email', ''))
+      and can_manage_notices = true
   );
 $$;
 
@@ -160,11 +177,36 @@ with check (
 );
 
 drop policy if exists "session_block_comments_delete_admin" on public.session_block_comments;
-create policy "session_block_comments_delete_admin"
+drop policy if exists "session_block_comments_update_authorized" on public.session_block_comments;
+create policy "session_block_comments_update_authorized"
+on public.session_block_comments
+for update
+to authenticated
+using (
+  public.is_admin()
+  or author_email = lower(coalesce(auth.jwt() ->> 'email', ''))
+)
+with check (
+  public.is_admin()
+  or author_email = lower(coalesce(auth.jwt() ->> 'email', ''))
+);
+
+drop policy if exists "session_block_comments_delete_authorized" on public.session_block_comments;
+create policy "session_block_comments_delete_authorized"
 on public.session_block_comments
 for delete
 to authenticated
-using (public.is_admin());
+using (
+  public.is_admin()
+  or (
+    author_email = lower(coalesce(auth.jwt() ->> 'email', ''))
+    and not exists (
+      select 1
+      from public.session_block_comments as child
+      where child.parent_id = public.session_block_comments.id
+    )
+  )
+);
 
 create table if not exists public.member_cards (
   id uuid primary key default gen_random_uuid(),
@@ -248,12 +290,13 @@ to anon, authenticated
 using (true);
 
 drop policy if exists "session_notices_admin_write" on public.session_notices;
-create policy "session_notices_admin_write"
+drop policy if exists "session_notices_manage_authorized" on public.session_notices;
+create policy "session_notices_manage_authorized"
 on public.session_notices
 for all
 to authenticated
-using (public.is_admin())
-with check (public.is_admin());
+using (public.can_manage_notices())
+with check (public.can_manage_notices());
 
 -- 관리자 이메일을 한 줄 추가하세요.
 -- 예시:
@@ -265,6 +308,13 @@ with check (public.is_admin());
 -- on conflict (email) do update
 -- set can_comment = excluded.can_comment,
 --     can_manage_member_card = excluded.can_manage_member_card,
+--     updated_at = now();
+--
+-- 공지사항 편집 허용:
+-- insert into public.user_permissions (email, can_manage_notices)
+-- values ('notice@example.com', true)
+-- on conflict (email) do update
+-- set can_manage_notices = true,
 --     updated_at = now();
 --
 -- 댓글만 허용:

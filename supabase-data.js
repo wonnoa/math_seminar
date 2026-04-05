@@ -1,4 +1,4 @@
-import { getAuthState, supabase } from "./supabase-auth.js?v=20260405-0315";
+import { getAuthState, supabase } from "./supabase-auth.js?v=20260406-0035";
 
 function requireAdmin() {
   if (!getAuthState().isAdmin) {
@@ -19,6 +19,14 @@ function requireMemberCardPermission() {
 
   if (!(auth.isAdmin || auth.canManageMemberCard)) {
     throw new Error("멤버 카드 권한이 필요합니다.");
+  }
+}
+
+function requireNoticePermission() {
+  const auth = getAuthState();
+
+  if (!(auth.isAdmin || auth.canManageNotices)) {
+    throw new Error("공지 편집 권한이 필요합니다.");
   }
 }
 
@@ -163,6 +171,26 @@ export async function createSessionBlockComment(sessionKey, blockId, body, paren
   return data;
 }
 
+export async function updateSessionBlockComment(commentId, body) {
+  requireCommentPermission();
+
+  const { data, error } = await supabase
+    .from("session_block_comments")
+    .update({
+      body,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", commentId)
+    .select("id, session_key, block_id, parent_id, body, author_email, created_at, updated_at")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function deleteSessionBlockCommentsByBlockIds(sessionKey, blockIds) {
   requireAdmin();
 
@@ -182,12 +210,12 @@ export async function deleteSessionBlockCommentsByBlockIds(sessionKey, blockIds)
 }
 
 export async function deleteSessionBlockComment(commentId) {
-  requireAdmin();
+  requireCommentPermission();
 
   const { error } = await supabase
     .from("session_block_comments")
     .delete()
-    .or(`id.eq.${commentId},parent_id.eq.${commentId}`);
+    .eq("id", commentId);
 
   if (error) {
     throw error;
@@ -259,8 +287,22 @@ export async function fetchNotices() {
   return data ?? [];
 }
 
+export async function fetchNoticeById(id) {
+  const { data, error } = await supabase
+    .from("session_notices")
+    .select("id, notice_date, title, body, saved_at, updated_at")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function saveNotice(notice) {
-  requireAdmin();
+  requireNoticePermission();
 
   const { error } = await supabase.from("session_notices").upsert(
     {
@@ -280,7 +322,7 @@ export async function saveNotice(notice) {
 }
 
 export async function deleteNotice(id) {
-  requireAdmin();
+  requireNoticePermission();
 
   const { error } = await supabase.from("session_notices").delete().eq("id", id);
 

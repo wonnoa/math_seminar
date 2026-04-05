@@ -3,19 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>세션 | 선형대수 스터디 여정</title>
+    <title>공지 상세 | 선형대수 스터디 여정</title>
     <meta
       name="description"
-      content="선형대수 스터디 세션 기록을 작성하고 확인하는 페이지입니다."
+      content="선형대수 스터디 공지 상세를 확인하는 페이지입니다."
     />
     <meta
       name="robots"
       content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
     />
-    <link rel="canonical" href="https://mathlearn.wonnoa91.workers.dev/session" />
+    <link rel="canonical" href="https://mathlearn.wonnoa91.workers.dev/notice-post" />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="./site.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=20260405-0410" />
+    <link rel="stylesheet" href="./styles.css?v=20260405-0505" />
   </head>
   <body>
     <div class="app-layout">
@@ -31,12 +31,7 @@
               <span class="nav-slot-icon"></span>
               <span class="nav-slot-copy"><span class="nav-slot-label">홈</span></span>
             </a>
-            <a
-              class="nav-slot nav-slot-labeled active"
-              href="./sessions.html"
-              aria-label="세션"
-              aria-current="page"
-            >
+            <a class="nav-slot nav-slot-labeled" href="./sessions.html" aria-label="세션">
               <span class="nav-slot-icon"></span>
               <span class="nav-slot-copy"><span class="nav-slot-label">세션</span></span>
             </a>
@@ -52,7 +47,7 @@
               <span class="nav-slot-icon"></span>
               <span class="nav-slot-copy"><span class="nav-slot-label">멤버</span></span>
             </a>
-            <a class="nav-slot nav-slot-labeled" href="./notice.html" aria-label="공지사항">
+            <a class="nav-slot nav-slot-labeled active" href="./notice.html" aria-label="공지사항" aria-current="page">
               <span class="nav-slot-icon"></span>
               <span class="nav-slot-copy"><span class="nav-slot-label">공지사항</span></span>
             </a>
@@ -62,26 +57,39 @@
 
       <div class="page-shell">
         <header class="blueprint-header">
-          <p class="eyebrow">세션 노트</p>
-          <h1 data-session-page-title>세션</h1>
-          <a class="breadcrumb-link" href="./sessions.html">세션 목록으로</a>
+          <p class="eyebrow">공지 상세</p>
+          <h1 data-notice-post-title>공지</h1>
+          <a class="breadcrumb-link" href="./notice.html">공지 목록으로</a>
         </header>
 
         <main class="page-stack">
-          <section class="content-panel">
-            <div class="note-workspace">
-              <div class="session-actions">
-                <button class="session-button" type="button" data-note-create data-admin-only hidden>노트 만들기</button>
-                <p class="session-save-status" data-note-status>아직 저장된 내용이 없습니다.</p>
-              </div>
-              <div class="note-stack" data-note-board></div>
+          <section class="content-panel notice-post-shell" data-notice-post-root>
+            <div class="notice-post-loading" data-notice-post-loading>
+              <strong>공지를 불러오는 중입니다</strong>
+              <span>잠시만 기다려주세요.</span>
             </div>
+            <div class="notice-post-empty" data-notice-post-empty hidden>
+              <strong>공지를 찾을 수 없습니다</strong>
+              <span>목록으로 돌아가 다른 공지를 확인하세요.</span>
+            </div>
+            <article class="notice-post" data-notice-post hidden>
+              <div class="notice-card-head">
+                <div>
+                  <p class="spec-label">날짜별 공지</p>
+                  <h2 data-notice-post-heading></h2>
+                </div>
+              </div>
+              <div class="notice-post-meta">
+                <span data-notice-post-date></span>
+                <span data-notice-post-saved></span>
+              </div>
+              <div class="notice-post-body" data-notice-post-body></div>
+            </article>
           </section>
         </main>
       </div>
     </div>
 
-    <script type="module" src="./session-page.js?v=20260405-0725"></script>
-    <script type="module" src="./session-editor.js?v=20260405-0725"></script>
+    <script type="module" src="./notice-post.js?v=20260405-0505"></script>
   </body>
 </html>

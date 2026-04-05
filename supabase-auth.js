@@ -18,6 +18,7 @@ const state = {
   isAdmin: false,
   canComment: false,
   canManageMemberCard: false,
+  canManageNotices: false,
   user: null,
   error: "",
 };
@@ -29,6 +30,7 @@ function emitState() {
   document.body.dataset.admin = snapshot.isAdmin ? "true" : "false";
   document.body.dataset.canComment = snapshot.canComment ? "true" : "false";
   document.body.dataset.canManageMemberCard = snapshot.canManageMemberCard ? "true" : "false";
+  document.body.dataset.canManageNotices = snapshot.canManageNotices ? "true" : "false";
   document.body.dataset.authReady = snapshot.ready ? "true" : "false";
   listeners.forEach((listener) => listener(snapshot));
 }
@@ -57,6 +59,7 @@ async function fetchPermissions(email) {
       isAdmin: false,
       canComment: false,
       canManageMemberCard: false,
+      canManageNotices: false,
     };
   }
 
@@ -65,7 +68,7 @@ async function fetchPermissions(email) {
   try {
     const { data, error } = await supabase
       .from("user_permissions")
-      .select("is_admin, can_comment, can_manage_member_card")
+      .select("is_admin, can_comment, can_manage_member_card, can_manage_notices")
       .eq("email", email.toLowerCase())
       .maybeSingle();
 
@@ -83,6 +86,7 @@ async function fetchPermissions(email) {
     isAdmin,
     canComment: isAdmin || Boolean(permissionRow?.can_comment),
     canManageMemberCard: isAdmin || Boolean(permissionRow?.can_manage_member_card),
+    canManageNotices: isAdmin || Boolean(permissionRow?.can_manage_notices),
   };
 }
 
@@ -104,6 +108,7 @@ export async function refreshAuthState() {
           isAdmin: false,
           canComment: false,
           canManageMemberCard: false,
+          canManageNotices: false,
         };
 
     state.ready = true;
@@ -111,6 +116,7 @@ export async function refreshAuthState() {
     state.isAdmin = permissions.isAdmin;
     state.canComment = permissions.canComment;
     state.canManageMemberCard = permissions.canManageMemberCard;
+    state.canManageNotices = permissions.canManageNotices;
     state.error = "";
   } catch (error) {
     state.ready = true;
@@ -118,6 +124,7 @@ export async function refreshAuthState() {
     state.isAdmin = false;
     state.canComment = false;
     state.canManageMemberCard = false;
+    state.canManageNotices = false;
     state.error = error?.message ?? "Supabase 연결을 확인할 수 없습니다.";
   }
 
