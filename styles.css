@@ -1269,10 +1269,10 @@ body::after {
 }
 
 .note-editor-pane {
-  min-height: 260px;
+  min-height: 180px;
   padding: 0;
   display: grid;
-  gap: 12px;
+  gap: 8px;
 }
 
 .note-block-meta {
@@ -1285,15 +1285,15 @@ body::after {
 .note-comment-thread,
 .note-comment-children {
   display: grid;
-  gap: 10px;
+  gap: 6px;
 }
 
 .note-comment-empty {
   display: grid;
-  gap: 6px;
-  padding: 14px 16px;
+  gap: 4px;
+  padding: 10px 12px;
   border: 1px dashed rgba(246, 245, 234, 0.12);
-  border-radius: 18px;
+  border-radius: 14px;
   color: var(--muted);
 }
 
@@ -1303,12 +1303,12 @@ body::after {
 
 .note-comment-card {
   display: grid;
-  gap: 10px;
-  padding: 14px 16px;
-  border-radius: 18px;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 14px;
   border: 1px solid rgba(246, 245, 234, 0.08);
   background: rgba(246, 245, 234, 0.035);
-  margin-left: calc(var(--comment-depth, 0) * 18px);
+  margin-left: calc(var(--comment-depth, 0) * 12px);
 }
 
 .note-comment-legacy {
@@ -1318,24 +1318,25 @@ body::after {
 .note-comment-meta {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
 }
 
 .note-comment-author {
   color: var(--ink);
-  font-size: 0.86rem;
+  font-size: 0.8rem;
 }
 
 .note-comment-time {
   color: var(--muted);
-  font-size: 0.75rem;
-  line-height: 1.4;
+  font-size: 0.7rem;
+  line-height: 1.3;
 }
 
 .note-comment-body {
   color: var(--ink);
-  line-height: 1.7;
+  line-height: 1.55;
+  font-size: 0.9rem;
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -1344,29 +1345,29 @@ body::after {
 .note-comment-composer-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   justify-content: flex-end;
 }
 
 .note-comment-composer,
 .note-comment-reply-composer {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .note-comment-textarea {
   width: 100%;
   display: block;
-  min-height: 96px;
+  min-height: 68px;
   border: 1px solid rgba(246, 245, 234, 0.1);
-  border-radius: 18px;
+  border-radius: 14px;
   resize: none;
   background: rgba(246, 245, 234, 0.03);
   color: var(--ink);
   font: inherit;
-  line-height: 1.7;
-  font-size: 0.94rem;
-  padding: 14px 16px;
+  line-height: 1.55;
+  font-size: 0.9rem;
+  padding: 10px 12px;
 }
 
 .note-comment-textarea::placeholder {

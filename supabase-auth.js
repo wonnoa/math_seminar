@@ -16,6 +16,8 @@ const listeners = new Set();
 const state = {
   ready: false,
   isAdmin: false,
+  canComment: false,
+  canManageMemberCard: false,
   user: null,
   error: "",
 };
@@ -25,6 +27,8 @@ let mounted = false;
 function emitState() {
   const snapshot = { ...state };
   document.body.dataset.admin = snapshot.isAdmin ? "true" : "false";
+  document.body.dataset.canComment = snapshot.canComment ? "true" : "false";
+  document.body.dataset.canManageMemberCard = snapshot.canManageMemberCard ? "true" : "false";
   document.body.dataset.authReady = snapshot.ready ? "true" : "false";
   listeners.forEach((listener) => listener(snapshot));
 }
@@ -47,6 +51,41 @@ async function checkAdmin(email) {
   return Boolean(data);
 }
 
+async function fetchPermissions(email) {
+  if (!email) {
+    return {
+      isAdmin: false,
+      canComment: false,
+      canManageMemberCard: false,
+    };
+  }
+
+  let permissionRow = null;
+
+  try {
+    const { data, error } = await supabase
+      .from("user_permissions")
+      .select("is_admin, can_comment, can_manage_member_card")
+      .eq("email", email.toLowerCase())
+      .maybeSingle();
+
+    if (!error) {
+      permissionRow = data;
+    }
+  } catch {
+    permissionRow = null;
+  }
+
+  const legacyAdmin = await checkAdmin(email).catch(() => false);
+  const isAdmin = legacyAdmin || Boolean(permissionRow?.is_admin);
+
+  return {
+    isAdmin,
+    canComment: isAdmin || Boolean(permissionRow?.can_comment),
+    canManageMemberCard: isAdmin || Boolean(permissionRow?.can_manage_member_card),
+  };
+}
+
 export async function refreshAuthState() {
   try {
     const {
@@ -59,16 +98,26 @@ export async function refreshAuthState() {
     }
 
     const user = session?.user ?? null;
-    const isAdmin = user?.email ? await checkAdmin(user.email) : false;
+    const permissions = user?.email
+      ? await fetchPermissions(user.email)
+      : {
+          isAdmin: false,
+          canComment: false,
+          canManageMemberCard: false,
+        };
 
     state.ready = true;
     state.user = user;
-    state.isAdmin = isAdmin;
+    state.isAdmin = permissions.isAdmin;
+    state.canComment = permissions.canComment;
+    state.canManageMemberCard = permissions.canManageMemberCard;
     state.error = "";
   } catch (error) {
     state.ready = true;
     state.user = null;
     state.isAdmin = false;
+    state.canComment = false;
+    state.canManageMemberCard = false;
     state.error = error?.message ?? "Supabase 연결을 확인할 수 없습니다.";
   }
 
@@ -119,12 +168,12 @@ function buildAuthPanel() {
   panel.className = "auth-panel";
   panel.dataset.authPanel = "true";
   panel.innerHTML = `
-    <p class="spec-label">관리자</p>
+    <p class="spec-label">계정</p>
     <div class="auth-panel-head">
-      <span class="auth-panel-status" data-auth-status>읽기 전용</span>
-      <button class="session-button secondary auth-panel-button" type="button" data-auth-action>관리자 로그인</button>
+      <span class="auth-panel-status" data-auth-status>로그인 안 됨</span>
+      <button class="session-button secondary auth-panel-button" type="button" data-auth-action>로그인</button>
     </div>
-    <p class="auth-panel-meta" data-auth-meta>편집 기능은 관리자 로그인 후 사용할 수 있습니다.</p>
+    <p class="auth-panel-meta" data-auth-meta>로그인하면 부여된 권한에 따라 편집 기능이 열립니다.</p>
     <form class="auth-login-form" data-auth-form hidden>
       <label class="auth-field">
         <span class="auth-field-label">이메일</span>
@@ -181,7 +230,7 @@ function buildAuthPanel() {
   actionButton?.addEventListener("click", async () => {
     const current = getAuthState();
 
-    if (current.isAdmin) {
+    if (current.user) {
       try {
         actionButton.disabled = true;
         await signOutAdmin();
@@ -235,7 +284,7 @@ function buildAuthPanel() {
 
     if (!nextState.ready) {
       statusEl.textContent = "확인 중";
-      metaEl.textContent = "관리자 상태를 확인하고 있습니다.";
+      metaEl.textContent = "계정 권한을 확인하고 있습니다.";
       actionButton.textContent = "잠시만";
       actionButton.disabled = true;
       form.hidden = true;
@@ -246,16 +295,29 @@ function buildAuthPanel() {
 
     if (nextState.isAdmin) {
       statusEl.textContent = "관리자 로그인됨";
-      metaEl.textContent = nextState.user?.email ?? "관리자 계정";
+      metaEl.textContent = nextState.user?.email ?? "전체 관리자";
       actionButton.textContent = "로그아웃";
       form.hidden = true;
       return;
     }
 
     if (nextState.user && !nextState.isAdmin) {
-      statusEl.textContent = "읽기 전용";
-      metaEl.textContent = "로그인은 되었지만 관리자 권한이 없습니다.";
-      actionButton.textContent = "관리자 로그인";
+      const enabled = [];
+
+      if (nextState.canComment) {
+        enabled.push("댓글");
+      }
+
+      if (nextState.canManageMemberCard) {
+        enabled.push("멤버 카드");
+      }
+
+      statusEl.textContent = enabled.length > 0 ? "권한 로그인됨" : "읽기 전용";
+      metaEl.textContent =
+        enabled.length > 0
+          ? `${nextState.user.email ?? "계정"} · ${enabled.join(", ")} 권한`
+          : "로그인은 되었지만 부여된 권한이 없습니다.";
+      actionButton.textContent = "로그아웃";
       form.hidden = true;
       return;
     }
@@ -263,14 +325,14 @@ function buildAuthPanel() {
     if (nextState.error) {
       statusEl.textContent = "설정 필요";
       metaEl.textContent = "Supabase 테이블 또는 권한 설정을 먼저 완료해야 합니다.";
-      actionButton.textContent = "관리자 로그인";
+      actionButton.textContent = "로그인";
       form.hidden = true;
       return;
     }
 
-    statusEl.textContent = "읽기 전용";
-    metaEl.textContent = "편집 기능은 관리자 로그인 후 사용할 수 있습니다.";
-    actionButton.textContent = "관리자 로그인";
+    statusEl.textContent = "로그인 안 됨";
+    metaEl.textContent = "로그인하면 부여된 권한에 따라 편집 기능이 열립니다.";
+    actionButton.textContent = "로그인";
   });
 }
 

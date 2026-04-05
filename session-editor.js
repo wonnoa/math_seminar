@@ -1,4 +1,4 @@
-import { subscribeAuthState } from "./supabase-auth.js";
+import { subscribeAuthState } from "./supabase-auth.js?v=20260405-0315";
 import {
   createSessionBlockComment,
   deleteSessionBlockComment,
@@ -6,7 +6,7 @@ import {
   fetchSessionBlockComments,
   fetchSessionNotes,
   saveSessionNotes,
-} from "./supabase-data.js";
+} from "./supabase-data.js?v=20260405-0315";
 
 const initSessionNotes = () => {
   const board = document.querySelector("[data-note-board]");
@@ -31,6 +31,8 @@ const initSessionNotes = () => {
     replyDrafts: {},
     openReplyForms: {},
     isAdmin: false,
+    canComment: false,
+    userEmail: "",
   };
 
   const createId = () =>
@@ -238,6 +240,8 @@ const initSessionNotes = () => {
     });
   };
 
+  const canWriteComments = () => state.isAdmin || state.canComment;
+
   const addBlockToNote = (noteIndex, type) => {
     if (!state.isAdmin) {
       return;
@@ -294,7 +298,7 @@ const initSessionNotes = () => {
   };
 
   const submitComment = async ({ blockId, body, parentId = null }) => {
-    if (!state.isAdmin) {
+    if (!canWriteComments()) {
       return;
     }
 
@@ -347,7 +351,7 @@ const initSessionNotes = () => {
     submitLabel,
     onInput,
     onSubmit,
-    minHeight = 96,
+    minHeight = 68,
   }) => {
     const wrapper = document.createElement("div");
     wrapper.className = className;
@@ -356,7 +360,7 @@ const initSessionNotes = () => {
     textarea.className = "note-comment-textarea";
     textarea.placeholder = placeholder;
     textarea.value = value;
-    textarea.readOnly = !state.isAdmin;
+    textarea.readOnly = !canWriteComments();
 
     textarea.addEventListener("input", (event) => {
       onInput(event.currentTarget.value);
@@ -365,8 +369,7 @@ const initSessionNotes = () => {
 
     const actions = document.createElement("div");
     actions.className = "note-comment-composer-actions";
-    actions.dataset.adminOnly = "true";
-    actions.hidden = !state.isAdmin;
+    actions.hidden = !canWriteComments();
 
     const submitButton = document.createElement("button");
     submitButton.className = "session-button note-card-button";
@@ -408,8 +411,7 @@ const initSessionNotes = () => {
 
     const actions = document.createElement("div");
     actions.className = "note-comment-actions";
-    actions.dataset.adminOnly = "true";
-    actions.hidden = !state.isAdmin;
+    actions.hidden = !(canWriteComments() || state.isAdmin);
 
     const replyButton = document.createElement("button");
     replyButton.className = "session-button secondary note-card-button";
@@ -428,10 +430,17 @@ const initSessionNotes = () => {
       await removeComment(comment.id);
     });
 
-    actions.append(replyButton, deleteButton);
+    if (canWriteComments()) {
+      actions.appendChild(replyButton);
+    }
+
+    if (state.isAdmin) {
+      actions.appendChild(deleteButton);
+    }
+
     card.append(meta, body, actions);
 
-    if (state.isAdmin && state.openReplyForms[comment.id]) {
+    if (canWriteComments() && state.openReplyForms[comment.id]) {
       const replyComposer = createCommentComposer({
         className: "note-comment-reply-composer",
         value: state.replyDrafts[comment.id] ?? "",
@@ -447,7 +456,7 @@ const initSessionNotes = () => {
             parentId: comment.id,
           });
         },
-        minHeight: 84,
+        minHeight: 60,
       });
 
       card.appendChild(replyComposer);
@@ -681,7 +690,26 @@ const initSessionNotes = () => {
             body: state.commentDrafts[block.id] ?? "",
           });
         },
-        minHeight: 96,
+        minHeight: 68,
+      });
+
+      commentPane.appendChild(composer);
+    } else if (state.canComment) {
+      const composer = createCommentComposer({
+        className: "note-comment-composer",
+        value: state.commentDrafts[block.id] ?? "",
+        placeholder: "이 사진 블록에 댓글을 남기세요.",
+        submitLabel: "댓글 올리기",
+        onInput: (value) => {
+          state.commentDrafts[block.id] = value;
+        },
+        onSubmit: async () => {
+          await submitComment({
+            blockId: block.id,
+            body: state.commentDrafts[block.id] ?? "",
+          });
+        },
+        minHeight: 68,
       });
 
       commentPane.appendChild(composer);
@@ -859,6 +887,8 @@ const initSessionNotes = () => {
 
   subscribeAuthState((authState) => {
     state.isAdmin = authState.isAdmin;
+    state.canComment = authState.canComment;
+    state.userEmail = authState.user?.email?.toLowerCase() ?? "";
     render();
   });
 

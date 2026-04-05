@@ -1,5 +1,5 @@
-import { subscribeAuthState } from "./supabase-auth.js";
-import { deleteNotice, fetchNotices, saveNotice } from "./supabase-data.js";
+import { subscribeAuthState } from "./supabase-auth.js?v=20260405-0315";
+import { deleteNotice, fetchNotices, saveNotice } from "./supabase-data.js?v=20260405-0315";
 
 const initNoticeBoard = () => {
   const board = document.querySelector("[data-notice-board]");

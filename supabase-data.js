@@ -1,8 +1,24 @@
-import { getAuthState, supabase } from "./supabase-auth.js";
+import { getAuthState, supabase } from "./supabase-auth.js?v=20260405-0315";
 
 function requireAdmin() {
   if (!getAuthState().isAdmin) {
     throw new Error("관리자 권한이 필요합니다.");
+  }
+}
+
+function requireCommentPermission() {
+  const auth = getAuthState();
+
+  if (!(auth.isAdmin || auth.canComment)) {
+    throw new Error("댓글 권한이 필요합니다.");
+  }
+}
+
+function requireMemberCardPermission() {
+  const auth = getAuthState();
+
+  if (!(auth.isAdmin || auth.canManageMemberCard)) {
+    throw new Error("멤버 카드 권한이 필요합니다.");
   }
 }
 
@@ -123,7 +139,7 @@ export async function fetchSessionBlockComments(sessionKey) {
 }
 
 export async function createSessionBlockComment(sessionKey, blockId, body, parentId = null) {
-  requireAdmin();
+  requireCommentPermission();
 
   const authorEmail = getAuthState().user?.email?.toLowerCase() ?? "";
 
@@ -181,7 +197,7 @@ export async function deleteSessionBlockComment(commentId) {
 export async function fetchMembers() {
   const { data, error } = await supabase
     .from("member_cards")
-    .select("id, sort_order, name, description, image_data, updated_at")
+    .select("id, owner_email, sort_order, name, description, image_data, updated_at")
     .order("sort_order", { ascending: true })
     .order("updated_at", { ascending: false });
 
@@ -193,11 +209,18 @@ export async function fetchMembers() {
 }
 
 export async function saveMember(member, index) {
-  requireAdmin();
+  requireMemberCardPermission();
+
+  const auth = getAuthState();
+  const ownerEmail =
+    auth.isAdmin
+      ? member.ownerEmail ?? ""
+      : auth.user?.email?.toLowerCase() ?? "";
 
   const { error } = await supabase.from("member_cards").upsert(
     {
       id: member.id,
+      owner_email: ownerEmail,
       sort_order: index,
       name: member.name ?? "",
       description: member.text ?? "",
@@ -213,7 +236,7 @@ export async function saveMember(member, index) {
 }
 
 export async function deleteMember(id) {
-  requireAdmin();
+  requireMemberCardPermission();
 
   const { error } = await supabase.from("member_cards").delete().eq("id", id);
 

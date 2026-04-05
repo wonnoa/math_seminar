@@ -1,5 +1,5 @@
-import { subscribeAuthState } from "./supabase-auth.js";
-import { deleteMember, fetchMembers, saveMember } from "./supabase-data.js";
+import { subscribeAuthState } from "./supabase-auth.js?v=20260405-0315";
+import { deleteMember, fetchMembers, saveMember } from "./supabase-data.js?v=20260405-0315";
 
 const initMemberBoard = () => {
   const board = document.querySelector("[data-member-board]");
@@ -18,7 +18,17 @@ const initMemberBoard = () => {
   const state = {
     members: [],
     isAdmin: false,
+    canManageMemberCard: false,
+    userEmail: "",
   };
+
+  const canCreateMemberCard = () => state.isAdmin || state.canManageMemberCard;
+
+  const canEditMemberCard = (member) =>
+    state.isAdmin ||
+    (state.canManageMemberCard &&
+      Boolean(state.userEmail) &&
+      member.ownerEmail === state.userEmail);
 
   const setStatus = (message) => {
     if (status) {
@@ -80,6 +90,7 @@ const initMemberBoard = () => {
 
     return {
       id: member.id ?? crypto.randomUUID(),
+      ownerEmail: member.owner_email ?? member.ownerEmail ?? "",
       name: member.name ?? "",
       text: member.description ?? member.text ?? "",
       image: member.image_data ?? member.image ?? "",
@@ -91,10 +102,10 @@ const initMemberBoard = () => {
     empty.className = "member-empty";
     empty.innerHTML = `
       <strong>아직 멤버 카드가 없습니다</strong>
-      <span>${state.isAdmin ? "프로필 카드 만들기를 눌러 멤버 소개를 추가하세요." : "관리자가 멤버 카드를 등록하면 여기에 표시됩니다."}</span>
+      <span>${canCreateMemberCard() ? "프로필 카드 만들기를 눌러 멤버 소개를 추가하세요." : "관리자가 멤버 카드를 등록하면 여기에 표시됩니다."}</span>
     `;
 
-    if (state.isAdmin) {
+    if (canCreateMemberCard()) {
       empty.addEventListener("click", addMemberCard);
     }
 
@@ -102,12 +113,24 @@ const initMemberBoard = () => {
   };
 
   const addMemberCard = () => {
-    if (!state.isAdmin) {
+    if (!canCreateMemberCard()) {
+      return;
+    }
+
+    if (!state.isAdmin && state.members.some((member) => member.ownerEmail === state.userEmail)) {
+      setStatus("이미 본인 프로필 카드가 있습니다.");
+
+      requestAnimationFrame(() => {
+        const existingCard = board.querySelector(`[data-owner-email="${state.userEmail}"] .member-name`);
+        existingCard?.focus();
+      });
+
       return;
     }
 
     state.members.push({
       id: crypto.randomUUID(),
+      ownerEmail: state.isAdmin ? "" : state.userEmail,
       name: "",
       text: "",
       image: "",
@@ -136,6 +159,10 @@ const initMemberBoard = () => {
   };
 
   const syncMemberOrder = async () => {
+    if (!state.isAdmin) {
+      return;
+    }
+
     await Promise.all(state.members.map((member, index) => saveMember(member, index)));
   };
 
@@ -143,6 +170,8 @@ const initMemberBoard = () => {
     const card = document.createElement("article");
     card.className = "member-card";
     card.dataset.memberIndex = String(index);
+    card.dataset.ownerEmail = member.ownerEmail ?? "";
+    const canEdit = canEditMemberCard(member);
 
     const imageWrap = document.createElement("div");
     imageWrap.className = "member-photo";
@@ -158,15 +187,14 @@ const initMemberBoard = () => {
       placeholder.className = "member-photo-placeholder";
       placeholder.innerHTML = `
         <strong>사진 없음</strong>
-        <span>${state.isAdmin ? "프로필 사진을 추가하세요." : "등록된 사진이 없습니다."}</span>
+        <span>${canEdit ? "프로필 사진을 추가하세요." : "등록된 사진이 없습니다."}</span>
       `;
       imageWrap.appendChild(placeholder);
     }
 
     const mediaActions = document.createElement("div");
     mediaActions.className = "member-media-actions";
-    mediaActions.dataset.adminOnly = "true";
-    mediaActions.hidden = !state.isAdmin;
+    mediaActions.hidden = !canEdit;
 
     const uploadButton = document.createElement("button");
     uploadButton.className = "session-button secondary note-card-button";
@@ -226,7 +254,7 @@ const initMemberBoard = () => {
     nameInput.placeholder = "이름 또는 닉네임";
     nameInput.value = member.name;
     nameInput.dataset.memberIndex = String(index);
-    nameInput.readOnly = !state.isAdmin;
+    nameInput.readOnly = !canEdit;
     nameInput.addEventListener("input", (event) => {
       const currentIndex = Number(event.currentTarget.dataset.memberIndex);
       state.members[currentIndex].name = event.currentTarget.value;
@@ -238,7 +266,7 @@ const initMemberBoard = () => {
     textArea.placeholder = "소개나 메모를 적으세요.";
     textArea.value = member.text;
     textArea.dataset.memberIndex = String(index);
-    textArea.readOnly = !state.isAdmin;
+    textArea.readOnly = !canEdit;
     textArea.addEventListener("input", (event) => {
       const currentIndex = Number(event.currentTarget.dataset.memberIndex);
       state.members[currentIndex].text = event.currentTarget.value;
@@ -248,8 +276,7 @@ const initMemberBoard = () => {
 
     const actions = document.createElement("div");
     actions.className = "member-actions";
-    actions.dataset.adminOnly = "true";
-    actions.hidden = !state.isAdmin;
+    actions.hidden = !canEdit;
 
     const saveButton = document.createElement("button");
     saveButton.className = "session-button note-card-button";
@@ -276,11 +303,11 @@ const initMemberBoard = () => {
           await deleteMember(removed.id);
         }
 
-        if (state.members.length > 0) {
+        if (state.isAdmin && state.members.length > 0) {
           await syncMemberOrder();
           setStatus("멤버 카드를 삭제했습니다.");
         } else {
-          setStatus("멤버 카드를 모두 지웠습니다.");
+          setStatus(state.members.length === 0 ? "멤버 카드를 모두 지웠습니다." : "멤버 카드를 삭제했습니다.");
         }
       } catch (error) {
         setStatus(error?.message ?? "멤버 카드를 삭제하지 못했습니다.");
@@ -295,7 +322,9 @@ const initMemberBoard = () => {
 
   const render = () => {
     board.innerHTML = "";
-    createButton.hidden = !state.isAdmin;
+    createButton.hidden =
+      !canCreateMemberCard() ||
+      (!state.isAdmin && state.members.some((member) => member.ownerEmail === state.userEmail));
 
     if (state.members.length === 0) {
       createEmptyState();
@@ -328,6 +357,8 @@ const initMemberBoard = () => {
 
   subscribeAuthState((authState) => {
     state.isAdmin = authState.isAdmin;
+    state.canManageMemberCard = authState.canManageMemberCard;
+    state.userEmail = authState.user?.email?.toLowerCase() ?? "";
     render();
   });
 
