@@ -1782,12 +1782,12 @@ body::after {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 8px;
   margin-top: 14px;
 }
 
-.column-ruler span {
+.ruler-node {
   display: grid;
   place-items: center;
   height: 28px;
@@ -1796,6 +1796,42 @@ body::after {
   color: rgba(255, 255, 255, 0.52);
   font-size: 0.72rem;
   background: rgba(255, 255, 255, 0.02);
+  font-weight: 800;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.ruler-node.done {
+  color: #091116;
+  background: var(--mint);
+  border-color: rgba(142, 222, 86, 0.36);
+  box-shadow: 0 0 0 1px rgba(142, 222, 86, 0.14), 0 0 16px rgba(142, 222, 86, 0.12);
+}
+
+.ruler-node.in_progress {
+  color: #091116;
+  background: var(--pink);
+  border-color: rgba(243, 202, 77, 0.34);
+  box-shadow: 0 0 0 1px rgba(243, 202, 77, 0.14), 0 0 14px rgba(243, 202, 77, 0.1);
+}
+
+.ruler-node.not_started {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.ruler-node.collapsed {
+  transform: translateY(-1px);
+}
+
+.ruler-node:not(:disabled) {
+  cursor: pointer;
+}
+
+.ruler-node:disabled {
+  cursor: default;
+}
+
+.ruler-node:not(:disabled):hover {
+  transform: translateY(-1px);
 }
 
 .journey-grid {
@@ -1894,11 +1930,23 @@ body::after {
   --accent-deep: var(--slate-deep);
 }
 
+.stage-card.is-collapsed {
+  grid-template-rows: auto auto auto auto;
+}
+
 .stage-head {
   display: flex;
   justify-content: space-between;
   gap: 12px;
   align-items: start;
+}
+
+.stage-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .status-pill,
@@ -2062,14 +2110,42 @@ body::after {
   flex-wrap: wrap;
 }
 
+.stage-card.is-collapsed .stage-footer {
+  margin-top: 18px;
+  padding-top: 0;
+  border-top: 0;
+}
+
 .metric-pill {
   color: var(--muted);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.topic-count {
+  min-width: 68px;
+}
+
 .calc-note {
   color: rgba(255, 255, 255, 0.42);
+}
+
+.stage-accordion-toggle {
+  margin-top: 12px;
+  width: 100%;
+  min-height: 34px;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+}
+
+.stage-accordion-toggle:hover {
+  color: var(--ink);
 }
 
 .stage-node {

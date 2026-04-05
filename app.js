@@ -145,8 +145,11 @@ const stages = [
 const STATUS_ORDER = ["not_started", "in_progress", "done"];
 let sectionState = {};
 let isAdmin = false;
+const collapsedStages = {};
+const previousStageStatuses = {};
 
 const journeyGrid = document.querySelector("#journeyGrid");
+const stageRuler = document.querySelector("#stageRuler");
 const gridSummary = document.querySelector("#gridSummary");
 const overallPercent = document.querySelector("#overallPercent");
 const overallPercentCaption = document.querySelector("#overallPercentCaption");
@@ -159,21 +162,20 @@ const heroMascotImage = document.querySelector("#heroMascotImage");
 const heroMascotCard = document.querySelector(".hero-mascot-card");
 const heroMascotPlaceholder = document.querySelector(".hero-mascot-placeholder");
 
-const rows = calculateRows(stages);
-journeyGrid.style.gridTemplateRows = `repeat(${rows.totalRows}, var(--row-unit))`;
 setupHeroMascot();
 renderJourney();
 initializeJourney();
 
-function calculateRows(input) {
+function calculateRows(stageEntries) {
   let cursor = 2;
   const result = [];
 
-  for (const stage of input) {
-    const headerUnits = stage.type === "front" ? 2 : 3;
+  for (const entry of stageEntries) {
+    const { stage, summary, collapsed } = entry;
+    const headerUnits = 3;
     const footerUnits = 1;
     const perSectionUnits = 2;
-    const sectionUnits = Math.max(2, stage.sections.length * perSectionUnits);
+    const sectionUnits = collapsed ? 1 : Math.max(2, stage.sections.length * perSectionUnits);
     const totalUnits = headerUnits + sectionUnits + footerUnits;
     const startRow = cursor;
     const endRow = startRow + totalUnits;
@@ -182,6 +184,8 @@ function calculateRows(input) {
 
     result.push({
       ...stage,
+      summary,
+      collapsed,
       headerUnits,
       footerUnits,
       perSectionUnits,
@@ -205,29 +209,70 @@ function calculateRows(input) {
 function renderJourney() {
   journeyGrid.replaceChildren();
 
-  const stageEntries = rows.stages.map((stage) => ({
+  const stageEntries = stages.map((stage) => ({
     stage,
     summary: summarizeStage(stage),
   }));
-  const totalTracked = stageEntries.reduce((sum, entry) => sum + entry.summary.total, 0);
-  const totalDone = stageEntries.reduce((sum, entry) => sum + entry.summary.doneCount, 0);
-  const totalDoing = stageEntries.reduce((sum, entry) => sum + entry.summary.inProgressCount, 0);
+  syncCollapsedState(stageEntries);
+
+  const layout = calculateRows(
+    stageEntries.map((entry) => ({
+      ...entry,
+      collapsed: isStageCollapsed(entry.stage.id),
+    })),
+  );
+  journeyGrid.style.gridTemplateRows = `repeat(${layout.totalRows}, var(--row-unit))`;
+
+  const totalTracked = layout.stages.reduce((sum, entry) => sum + entry.summary.total, 0);
+  const totalDone = layout.stages.reduce((sum, entry) => sum + entry.summary.doneCount, 0);
+  const totalDoing = layout.stages.reduce((sum, entry) => sum + entry.summary.inProgressCount, 0);
   gridSummary.textContent = `${stages.length}개 단계 · ${totalDone}/${totalTracked}개 섹션 완료`;
-  renderOverview(stageEntries, {
+  renderOverview(layout.stages, {
     totalTracked,
     totalDone,
     totalDoing,
   });
+  renderStageRuler(layout.stages);
 
-  for (const entry of stageEntries) {
-    journeyGrid.append(createCard(entry.stage, entry.summary));
-    journeyGrid.append(createNode(entry.stage, entry.summary));
+  for (const entry of layout.stages) {
+    journeyGrid.append(createCard(entry, entry.summary));
+    journeyGrid.append(createNode(entry, entry.summary));
   }
+}
+
+function syncCollapsedState(stageEntries) {
+  for (const entry of stageEntries) {
+    const stageId = entry.stage.id;
+    const currentStatus = entry.summary.status;
+    const previousStatus = previousStageStatuses[stageId];
+
+    if (!(stageId in collapsedStages)) {
+      collapsedStages[stageId] = currentStatus === "done";
+    } else if (currentStatus === "done" && previousStatus !== "done") {
+      collapsedStages[stageId] = true;
+    } else if (currentStatus !== "done" && previousStatus === "done") {
+      collapsedStages[stageId] = false;
+    }
+
+    previousStageStatuses[stageId] = currentStatus;
+  }
+}
+
+function isStageCollapsed(stageId) {
+  return Boolean(collapsedStages[stageId]);
+}
+
+function toggleStageCollapsed(stageId) {
+  collapsedStages[stageId] = !collapsedStages[stageId];
+  renderJourney();
 }
 
 function createCard(stage, summary) {
   const article = document.createElement("article");
   article.className = `stage-card ${stage.side} ${summary.status}`;
+  if (stage.collapsed) {
+    article.classList.add("is-collapsed");
+  }
   article.style.gridColumn = stage.side === "left" ? "1 / 6" : "8 / 13";
   article.style.gridRow = `${stage.startRow} / ${stage.endRow}`;
   article.style.setProperty("--connector-offset", `${stage.connectorOffset}px`);
@@ -243,7 +288,11 @@ function createCard(stage, summary) {
   status.className = "status-pill";
   status.textContent = statusLabel(summary.status);
 
-  head.append(meta, status);
+  const headActions = document.createElement("div");
+  headActions.className = "stage-head-actions";
+  headActions.append(status);
+
+  head.append(meta, headActions);
 
   const title = document.createElement("h2");
   title.className = "stage-title";
@@ -251,13 +300,18 @@ function createCard(stage, summary) {
 
   const legend = document.createElement("p");
   legend.className = "stage-legend";
-  legend.textContent = legendLabel(summary);
+  legend.textContent = stage.collapsed
+    ? `${summary.total}개 섹션을 모두 완료했습니다!`
+    : legendLabel(summary);
 
-  const list = document.createElement("ol");
-  list.className = "section-list";
+  let list = null;
+  if (!stage.collapsed) {
+    list = document.createElement("ol");
+    list.className = "section-list";
 
-  for (const section of stage.sections) {
-    list.append(createSectionItem(stage, section));
+    for (const section of stage.sections) {
+      list.append(createSectionItem(stage, section));
+    }
   }
 
   const footer = document.createElement("div");
@@ -265,18 +319,44 @@ function createCard(stage, summary) {
 
   const count = document.createElement("span");
   count.className = "metric-pill topic-count";
-  count.textContent = `${summary.doneCount}/${summary.total} 완료`;
+  count.textContent =
+    summary.status === "done" ? `${summary.doneCount}/${summary.total}` : `${summary.doneCount}/${summary.total} 완료`;
 
-  const height = document.createElement("span");
-  height.className = "metric-pill";
-  height.textContent = `${stage.sections.length}개 항목`;
+  footer.append(count);
 
-  const calc = document.createElement("div");
-  calc.className = "calc-note";
-  calc.textContent = isAdmin ? "섹션 행을 눌러 상태를 바꿉니다" : "읽기 전용으로 표시 중입니다";
+  if (!stage.collapsed) {
+    const height = document.createElement("span");
+    height.className = "metric-pill";
+    height.textContent = `${stage.sections.length}개 항목`;
 
-  footer.append(count, height, calc);
-  article.append(head, title, legend, list, footer);
+    const calc = document.createElement("div");
+    calc.className = "calc-note";
+    calc.textContent = isAdmin ? "섹션 행을 눌러 상태를 바꿉니다" : "읽기 전용으로 표시 중입니다";
+
+    footer.append(height, calc);
+  }
+
+  article.append(head, title, legend);
+  if (list) {
+    article.append(list);
+  }
+  article.append(footer);
+
+  if (summary.status === "done") {
+    const accordionToggle = document.createElement("button");
+    accordionToggle.className = "stage-accordion-toggle";
+    accordionToggle.type = "button";
+    accordionToggle.textContent = stage.collapsed ? "펼쳐서 보기" : "접기";
+    accordionToggle.setAttribute(
+      "aria-label",
+      `${stage.title} ${stage.collapsed ? "펼치기" : "접기"}`,
+    );
+    accordionToggle.addEventListener("click", () => {
+      toggleStageCollapsed(stage.id);
+    });
+    article.append(accordionToggle);
+  }
+
   return article;
 }
 
@@ -349,6 +429,38 @@ function createNode(stage, summary) {
 
   node.append(tag, core);
   return node;
+}
+
+function renderStageRuler(stageEntries) {
+  if (!stageRuler) {
+    return;
+  }
+
+  stageRuler.replaceChildren();
+
+  stageEntries.forEach((entry) => {
+    const button = document.createElement("button");
+    button.className = `ruler-node ${entry.summary.status}`;
+    if (entry.collapsed) {
+      button.classList.add("collapsed");
+    }
+    button.type = "button";
+    button.textContent = entry.label;
+    button.setAttribute(
+      "aria-label",
+      `${entry.title} ${statusLabel(entry.summary.status)}${entry.collapsed ? ", 접힘 상태" : ""}`,
+    );
+
+    if (entry.summary.status === "done") {
+      button.addEventListener("click", () => {
+        toggleStageCollapsed(entry.id);
+      });
+    } else {
+      button.disabled = true;
+    }
+
+    stageRuler.append(button);
+  });
 }
 
 function statusLabel(status) {
@@ -585,15 +697,15 @@ function renderMiniJourney(stageEntries, progressRatio) {
     });
 
     const text = createSvgElement("text", {
-      class: `mini-node-label${entry.stage.label.length > 2 ? " wide" : ""}`,
+      class: `mini-node-label${entry.label.length > 2 ? " wide" : ""}`,
       "text-anchor": "middle",
       "dominant-baseline": "middle",
       y: "1",
     });
-    text.textContent = entry.stage.label;
+    text.textContent = entry.label;
 
     const title = createSvgElement("title", {});
-    title.textContent = `${entry.stage.title} · ${statusLabel(entry.summary.status)}`;
+    title.textContent = `${entry.title} · ${statusLabel(entry.summary.status)}`;
 
     group.append(outer, inner, text, title);
     miniJourney.append(group);

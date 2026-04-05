@@ -38,7 +38,7 @@
     />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="./site.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=20260405-0410" />
+    <link rel="stylesheet" href="./styles.css?v=20260406-0120" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -77,6 +77,10 @@
               <span class="nav-slot-icon"></span>
               <span class="nav-slot-copy"><span class="nav-slot-label">홈</span></span>
             </a>
+            <a class="nav-slot nav-slot-labeled" href="./member.html" aria-label="멤버">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">멤버</span></span>
+            </a>
             <a class="nav-slot nav-slot-labeled" href="./sessions.html" aria-label="세션">
               <span class="nav-slot-icon"></span>
               <span class="nav-slot-copy"><span class="nav-slot-label">세션</span></span>
@@ -88,10 +92,6 @@
             <a class="nav-slot nav-slot-labeled" href="./future.html" aria-label="미래 지향">
               <span class="nav-slot-icon"></span>
               <span class="nav-slot-copy"><span class="nav-slot-label">미래 지향</span></span>
-            </a>
-            <a class="nav-slot nav-slot-labeled" href="./member.html" aria-label="멤버">
-              <span class="nav-slot-icon"></span>
-              <span class="nav-slot-copy"><span class="nav-slot-label">멤버</span></span>
             </a>
             <a class="nav-slot nav-slot-labeled" href="./notice.html" aria-label="공지사항">
               <span class="nav-slot-icon"></span>
@@ -170,26 +170,13 @@
               <span>저니맵</span>
               <span id="gridSummary">계산 중...</span>
             </div>
-            <div class="column-ruler" aria-hidden="true">
-              <span>1</span>
-              <span>2</span>
-              <span>3</span>
-              <span>4</span>
-              <span>5</span>
-              <span>6</span>
-              <span>7</span>
-              <span>8</span>
-              <span>9</span>
-              <span>10</span>
-              <span>11</span>
-              <span>12</span>
-            </div>
+            <div id="stageRuler" class="column-ruler" aria-label="챕터 진행 인디케이터"></div>
             <div id="journeyGrid" class="journey-grid" aria-label="저니맵 캔버스"></div>
           </section>
         </main>
       </div>
     </div>
 
-    <script type="module" src="./app.js?v=20260405-0315"></script>
+    <script type="module" src="./app.js?v=20260406-0120"></script>
   </body>
 </html>
