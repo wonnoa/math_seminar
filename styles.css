@@ -169,10 +169,11 @@ body::after {
 }
 
 .blueprint-header h1 {
-  margin-top: 10px;
-  font-size: clamp(2.5rem, 4vw, 4.25rem);
+  margin-top: 0;
+  font-size: clamp(2rem, 3.8vw, 4.25rem);
   line-height: 1.02;
-  max-width: 10ch;
+  max-width: none;
+  white-space: nowrap;
 }
 
 .header-copy {
@@ -1932,6 +1933,16 @@ body::after {
 
 .stage-card.is-collapsed {
   grid-template-rows: auto auto auto auto;
+  padding: 16px 18px 8px;
+}
+
+.stage-card.is-collapsed .stage-title {
+  margin-top: 8px;
+}
+
+.stage-card.is-collapsed .stage-legend {
+  margin-top: 9px;
+  line-height: 1.55;
 }
 
 .stage-head {
@@ -2111,7 +2122,7 @@ body::after {
 }
 
 .stage-card.is-collapsed .stage-footer {
-  margin-top: 18px;
+  margin-top: 10px;
   padding-top: 0;
   border-top: 0;
 }
@@ -2131,9 +2142,9 @@ body::after {
 }
 
 .stage-accordion-toggle {
-  margin-top: 12px;
+  margin-top: 4px;
   width: 100%;
-  min-height: 34px;
+  min-height: 24px;
   border: 0;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   background: transparent;
@@ -2142,6 +2153,7 @@ body::after {
   font-weight: 700;
   letter-spacing: 0.01em;
   cursor: pointer;
+  padding: 1px 0 0;
 }
 
 .stage-accordion-toggle:hover {
@@ -2306,6 +2318,10 @@ body::after {
 
   .hero-mascot-stage {
     min-height: 220px;
+  }
+
+  .blueprint-header h1 {
+    font-size: 2rem;
   }
 
   .page-shell {
