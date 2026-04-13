@@ -68,7 +68,7 @@ async function fetchPermissions(email) {
   try {
     const { data, error } = await supabase
       .from("user_permissions")
-      .select("is_admin, can_comment, can_manage_member_card, can_manage_notices")
+      .select("*")
       .eq("email", email.toLowerCase())
       .maybeSingle();
 

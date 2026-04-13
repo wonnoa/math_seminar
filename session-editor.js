@@ -1,4 +1,4 @@
-import { subscribeAuthState } from "./supabase-auth.js?v=20260405-0315";
+import { subscribeAuthState } from "./supabase-auth.js?v=20260414-001";
 import {
   createSessionBlockComment,
   deleteSessionBlockComment,
@@ -7,7 +7,7 @@ import {
   fetchSessionNotes,
   saveSessionNotes,
   updateSessionBlockComment,
-} from "./supabase-data.js?v=20260405-0725";
+} from "./supabase-data.js?v=20260414-001";
 
 const initSessionNotes = () => {
   const board = document.querySelector("[data-note-board]");

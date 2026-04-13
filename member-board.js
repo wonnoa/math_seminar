@@ -1,5 +1,5 @@
-import { subscribeAuthState } from "./supabase-auth.js?v=20260405-0315";
-import { deleteMember, fetchMembers, saveMember } from "./supabase-data.js?v=20260405-0315";
+import { subscribeAuthState } from "./supabase-auth.js?v=20260414-001";
+import { deleteMember, fetchMembers, saveMember } from "./supabase-data.js?v=20260414-001";
 
 const initMemberBoard = () => {
   const board = document.querySelector("[data-member-board]");

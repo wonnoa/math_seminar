@@ -1,5 +1,5 @@
-import { subscribeAuthState } from "./supabase-auth.js?v=20260405-0315";
-import { createSessionNote, fetchSessionNoteList } from "./supabase-data.js?v=20260405-0315";
+import { subscribeAuthState } from "./supabase-auth.js?v=20260414-001";
+import { createSessionNote, fetchSessionNoteList } from "./supabase-data.js?v=20260414-001";
 
 const list = document.querySelector("[data-session-list]");
 

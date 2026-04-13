@@ -1,4 +1,4 @@
-import { getAuthState, supabase } from "./supabase-auth.js?v=20260406-0035";
+import { getAuthState, supabase } from "./supabase-auth.js?v=20260414-001";
 
 function requireAdmin() {
   if (!getAuthState().isAdmin) {
