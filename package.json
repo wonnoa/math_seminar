@@ -1,0 +1,14 @@
+{
+  "name": "linear-algebra-toc-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "admin:doctor": "node scripts/admin/doctor.mjs",
+    "db:query": "node scripts/admin/run-sql.mjs",
+    "auth:admin": "node scripts/admin/auth-admin.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.58.0",
+    "postgres": "^3.4.7"
+  }
+}

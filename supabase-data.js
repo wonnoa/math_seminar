@@ -1,4 +1,4 @@
-import { getAuthState, supabase } from "./supabase-auth.js?v=20260416-002";
+import { getAuthState, supabase } from "./supabase-auth.js?v=20260416-004";
 
 function requireAdmin() {
   if (!getAuthState().isAdmin) {
@@ -95,10 +95,16 @@ export async function fetchSessionNoteList() {
   return data ?? [];
 }
 
-export async function saveSessionNotes(sessionKey, title, notes) {
+export async function saveSessionNotes(sessionKey, sessionDateOrTitle, titleOrNotes, maybeNotes) {
   requireSessionNotePermission();
 
-  const sessionDate = sessionKey.replace("session-", "");
+  const sessionDate =
+    maybeNotes !== undefined
+      ? sessionDateOrTitle
+      : sessionKey.replace("session-", "");
+  const title = maybeNotes !== undefined ? titleOrNotes : sessionDateOrTitle;
+  const notes = maybeNotes !== undefined ? maybeNotes : titleOrNotes;
+
   const { error } = await supabase.from("session_notes").upsert(
     {
       session_key: sessionKey,

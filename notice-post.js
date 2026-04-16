@@ -1,4 +1,4 @@
-import { fetchNoticeById } from "./supabase-data.js?v=20260416-002";
+import { fetchNoticeById } from "./supabase-data.js?v=20260416-004";
 
 const root = document.querySelector("[data-notice-post-root]");
 

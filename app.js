@@ -1,5 +1,5 @@
-import { subscribeAuthState } from "./supabase-auth.js?v=20260416-002";
-import { fetchSectionProgressMap, saveSectionProgress } from "./supabase-data.js?v=20260416-002";
+import { subscribeAuthState } from "./supabase-auth.js?v=20260416-004";
+import { fetchSectionProgressMap, saveSectionProgress } from "./supabase-data.js?v=20260416-004";
 
 const stages = [
   {

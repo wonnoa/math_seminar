@@ -1024,6 +1024,67 @@ body::after {
   color: var(--muted);
 }
 
+.session-create-form {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) minmax(220px, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(246, 245, 234, 0.08);
+  border-radius: 20px;
+  background: rgba(246, 245, 234, 0.03);
+}
+
+.session-create-field {
+  display: grid;
+  gap: 8px;
+}
+
+.session-create-field span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.session-create-input {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid rgba(246, 245, 234, 0.12);
+  border-radius: 14px;
+  background: rgba(18, 28, 20, 0.78);
+  color: var(--ink);
+}
+
+.session-create-input:focus-visible {
+  outline: 2px solid rgba(142, 222, 86, 0.28);
+  outline-offset: 2px;
+}
+
+.session-create-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.session-board-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.session-list-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.session-hide-button {
+  align-self: center;
+}
+
 .session-link,
 .topic-card {
   display: block;
@@ -1101,34 +1162,36 @@ body::after {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
-  padding: 11px 18px;
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 7px 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
+  border-radius: 10px;
   background: linear-gradient(180deg, #a4ea73 0%, #79cf47 100%);
   color: #091116;
   font: inherit;
-  font-size: 0.92rem;
-  font-weight: 800;
+  font-size: 0.82rem;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.14);
   transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
   appearance: none;
   -webkit-appearance: none;
   touch-action: manipulation;
   pointer-events: auto;
   overflow: hidden;
+  white-space: nowrap;
 }
 
 .session-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 14px 22px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 9px 16px rgba(0, 0, 0, 0.18);
   filter: brightness(1.02);
 }
 
 .session-button:active {
   transform: translateY(0);
-  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.14);
 }
 
 .session-button:focus-visible {
@@ -1191,6 +1254,14 @@ body::after {
   font-size: 0.98rem;
 }
 
+.note-empty-static {
+  cursor: default;
+}
+
+.note-empty-static:hover {
+  transform: none;
+}
+
 .note-card {
   border: 1px solid rgba(246, 245, 234, 0.08);
   border-radius: 24px;
@@ -1222,15 +1293,60 @@ body::after {
 }
 
 .note-card-button {
-  min-height: 36px;
-  padding: 8px 14px;
-  font-size: 0.84rem;
+  flex-shrink: 0;
+  min-height: 28px;
+  padding: 6px 10px;
+  font-size: 0.76rem;
+  white-space: nowrap;
 }
 
 .note-card-delete {
   color: #f7d7d7;
   background: rgba(155, 46, 46, 0.28);
   border-color: rgba(190, 82, 82, 0.28);
+}
+
+.note-card-deleted {
+  border-style: dashed;
+  background: rgba(246, 245, 234, 0.02);
+  box-shadow: none;
+}
+
+.deleted-note-stack {
+  display: grid;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.deleted-note-heading {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.deleted-note-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.deleted-note-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.deleted-note-title {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.94rem;
+}
+
+.deleted-note-meta {
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 0.76rem;
+  line-height: 1.4;
 }
 
 .note-upload-label {
@@ -1259,6 +1375,7 @@ body::after {
   color: #f7d7d7;
   background: rgba(155, 46, 46, 0.24);
   border-color: rgba(190, 82, 82, 0.24);
+  min-width: 84px;
 }
 
 .note-title {
@@ -1299,9 +1416,10 @@ body::after {
 
 .note-block-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
   justify-content: flex-end;
+  align-items: center;
   margin-bottom: 10px;
 }
 
@@ -1395,6 +1513,52 @@ body::after {
   height: 100%;
   object-fit: contain;
   object-position: center;
+  cursor: zoom-in;
+}
+
+.lightbox-open {
+  overflow: hidden;
+}
+
+.image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(6, 10, 9, 0.88);
+  backdrop-filter: blur(8px);
+}
+
+.image-lightbox-dialog {
+  width: min(100%, 1120px);
+  max-height: calc(100vh - 48px);
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
+.image-lightbox-close {
+  justify-self: end;
+}
+
+.image-lightbox-image {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: calc(100vh - 130px);
+  object-fit: contain;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 24px 44px rgba(0, 0, 0, 0.42);
+}
+
+.image-lightbox-caption {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.84rem;
+  text-align: center;
 }
 
 .note-editor-pane {
@@ -1473,9 +1637,19 @@ body::after {
 .note-comment-actions,
 .note-comment-composer-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-wrap: nowrap;
+  gap: 4px;
   justify-content: flex-end;
+  align-items: center;
+}
+
+.note-comment-composer-actions .session-button,
+.note-comment-actions .session-button {
+  min-width: 58px;
+  min-height: 24px;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  border-radius: 8px;
 }
 
 .note-comment-composer,

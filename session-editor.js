@@ -1,4 +1,4 @@
-import { subscribeAuthState } from "./supabase-auth.js?v=20260416-002";
+import { subscribeAuthState } from "./supabase-auth.js?v=20260416-004";
 import {
   createSessionBlockComment,
   deleteSessionBlockComment,
@@ -7,7 +7,7 @@ import {
   fetchSessionNotes,
   saveSessionNotes,
   updateSessionBlockComment,
-} from "./supabase-data.js?v=20260416-002";
+} from "./supabase-data.js?v=20260416-004";
 
 const initSessionNotes = () => {
   const board = document.querySelector("[data-note-board]");
@@ -18,6 +18,7 @@ const initSessionNotes = () => {
 
   const sessionKey = board.dataset.sessionKey;
   const sessionTitle = board.dataset.sessionTitle;
+  const sessionDate = board.dataset.sessionDate || "";
   const createButton = document.querySelector("[data-note-create]");
   const status = document.querySelector("[data-note-status]");
   const formatter = new Intl.DateTimeFormat("ko-KR", {
@@ -50,6 +51,61 @@ const initSessionNotes = () => {
   };
 
   const canEditNotes = () => state.isAdmin || state.canEditSessionNotes;
+  const canDeleteNotes = () => state.isAdmin;
+
+  const lightbox = (() => {
+    const root = document.createElement("div");
+    root.className = "image-lightbox";
+    root.hidden = true;
+
+    const dialog = document.createElement("div");
+    dialog.className = "image-lightbox-dialog";
+
+    const closeButton = document.createElement("button");
+    closeButton.className = "session-button secondary image-lightbox-close";
+    closeButton.type = "button";
+    closeButton.textContent = "닫기";
+
+    const image = document.createElement("img");
+    image.className = "image-lightbox-image";
+    image.alt = "확대 이미지";
+
+    const caption = document.createElement("p");
+    caption.className = "image-lightbox-caption";
+
+    const close = () => {
+      root.hidden = true;
+      document.body.classList.remove("lightbox-open");
+      image.removeAttribute("src");
+      caption.textContent = "";
+    };
+
+    const open = ({ src, alt, captionText = "" }) => {
+      image.src = src;
+      image.alt = alt || "확대 이미지";
+      caption.textContent = captionText;
+      root.hidden = false;
+      document.body.classList.add("lightbox-open");
+    };
+
+    closeButton.addEventListener("click", close);
+    root.addEventListener("click", (event) => {
+      if (event.target === root) {
+        close();
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !root.hidden) {
+        close();
+      }
+    });
+
+    dialog.append(closeButton, image, caption);
+    root.appendChild(dialog);
+    document.body.appendChild(root);
+
+    return { open, close };
+  })();
 
   const resizeTextarea = (textarea, minHeight = 180) => {
     textarea.style.height = "0px";
@@ -109,28 +165,40 @@ const initSessionNotes = () => {
   const normalizeNote = (note) => {
     if (typeof note === "string") {
       return {
+        id: createId(),
         title: "",
+        deletedAt: "",
+        deletedByEmail: "",
         blocks: [{ id: createId(), type: "text", text: note, image: "" }],
       };
     }
 
     if (!note || typeof note !== "object") {
       return {
+        id: createId(),
         title: "",
+        deletedAt: "",
+        deletedByEmail: "",
         blocks: [],
       };
     }
 
     if (Array.isArray(note.blocks)) {
       return {
+        id: note.id ?? createId(),
         title: note.title ?? "",
+        deletedAt: note.deletedAt ?? "",
+        deletedByEmail: note.deletedByEmail ?? "",
         blocks: note.blocks.map(normalizeBlock),
       };
     }
 
     if (note.image || note.content) {
       return {
+        id: note.id ?? createId(),
         title: note.title ?? "",
+        deletedAt: note.deletedAt ?? "",
+        deletedByEmail: note.deletedByEmail ?? "",
         blocks: [
           note.image
             ? { id: createId(), type: "media", text: note.content ?? "", image: note.image ?? "" }
@@ -140,7 +208,10 @@ const initSessionNotes = () => {
     }
 
     return {
+      id: note.id ?? createId(),
       title: note.title ?? "",
+      deletedAt: note.deletedAt ?? "",
+      deletedByEmail: note.deletedByEmail ?? "",
       blocks: [],
     };
   };
@@ -228,7 +299,12 @@ const initSessionNotes = () => {
 
   const persistAllNotes = async (message) => {
     try {
-      await saveSessionNotes(sessionKey, sessionTitle || document.title, state.notes);
+      await saveSessionNotes(
+        sessionKey,
+        sessionDate,
+        sessionTitle || document.title,
+        state.notes
+      );
       setStatus(message ?? `${formatter.format(new Date())}에 온라인 저장소에 저장했습니다.`);
     } catch (error) {
       setStatus(error?.message ?? "세션 노트를 저장하지 못했습니다.");
@@ -241,7 +317,10 @@ const initSessionNotes = () => {
     }
 
     state.notes.push({
+      id: createId(),
       title: "",
+      deletedAt: "",
+      deletedByEmail: "",
       blocks: [],
     });
     render();
@@ -284,7 +363,7 @@ const initSessionNotes = () => {
   };
 
   const deleteBlock = async (noteIndex, blockIndex) => {
-    if (!canEditNotes()) {
+    if (!canDeleteNotes()) {
       return;
     }
 
@@ -459,7 +538,7 @@ const initSessionNotes = () => {
     const replyButton = document.createElement("button");
     replyButton.className = "session-button secondary note-card-button";
     replyButton.type = "button";
-    replyButton.textContent = state.openReplyForms[comment.id] ? "답글 닫기" : "답글";
+    replyButton.textContent = state.openReplyForms[comment.id] ? "닫기" : "답글";
     replyButton.addEventListener("click", () => {
       delete state.openEditForms[comment.id];
       state.openReplyForms[comment.id] = !state.openReplyForms[comment.id];
@@ -469,7 +548,7 @@ const initSessionNotes = () => {
     const editButton = document.createElement("button");
     editButton.className = "session-button secondary note-card-button";
     editButton.type = "button";
-    editButton.textContent = state.openEditForms[comment.id] ? "수정 닫기" : "수정";
+    editButton.textContent = state.openEditForms[comment.id] ? "닫기" : "수정";
     editButton.addEventListener("click", () => {
       delete state.openReplyForms[comment.id];
       state.commentEditDrafts[comment.id] = state.commentEditDrafts[comment.id] ?? comment.body;
@@ -485,7 +564,7 @@ const initSessionNotes = () => {
     const deleteButton = document.createElement("button");
     deleteButton.className = "session-button secondary note-card-button note-block-delete";
     deleteButton.type = "button";
-    deleteButton.textContent = "댓글 삭제";
+    deleteButton.textContent = "삭제";
     deleteButton.addEventListener("click", async () => {
       if (!state.isAdmin && comment.children.length > 0) {
         setStatus("답글이 달린 댓글은 삭제할 수 없습니다.");
@@ -527,7 +606,7 @@ const initSessionNotes = () => {
       const saveEditButton = document.createElement("button");
       saveEditButton.className = "session-button note-card-button";
       saveEditButton.type = "button";
-      saveEditButton.textContent = "수정 저장";
+      saveEditButton.textContent = "저장";
       saveEditButton.addEventListener("click", async () => {
         await editComment(comment);
       });
@@ -554,7 +633,7 @@ const initSessionNotes = () => {
         className: "note-comment-reply-composer",
         value: state.replyDrafts[comment.id] ?? "",
         placeholder: "대댓글을 입력하세요.",
-        submitLabel: "대댓글 올리기",
+        submitLabel: "올리기",
         onInput: (value) => {
           state.replyDrafts[comment.id] = value;
         },
@@ -589,7 +668,7 @@ const initSessionNotes = () => {
 
     const actions = document.createElement("div");
     actions.className = "note-block-actions";
-    actions.hidden = !canEditNotes();
+    actions.hidden = !canDeleteNotes();
 
     const deleteButton = document.createElement("button");
     deleteButton.className = "session-button secondary note-card-button note-block-delete";
@@ -624,6 +703,7 @@ const initSessionNotes = () => {
   const createMediaBlock = (block, noteIndex, blockIndex) => {
     const wrapper = document.createElement("div");
     wrapper.className = "note-block note-block-media";
+    const noteTitle = state.notes[noteIndex]?.title ?? "";
 
     const mediaPane = document.createElement("div");
     mediaPane.className = "note-media-pane";
@@ -636,6 +716,24 @@ const initSessionNotes = () => {
       image.className = "note-image";
       image.src = block.image;
       image.alt = "첨부한 노트 이미지";
+      image.tabIndex = 0;
+      image.addEventListener("click", () => {
+        lightbox.open({
+          src: block.image,
+          alt: noteTitle ? `${noteTitle} 이미지` : "첨부한 노트 이미지",
+          captionText: noteTitle,
+        });
+      });
+      image.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          lightbox.open({
+            src: block.image,
+            alt: noteTitle ? `${noteTitle} 이미지` : "첨부한 노트 이미지",
+            captionText: noteTitle,
+          });
+        }
+      });
 
       preview.appendChild(image);
       mediaPane.appendChild(preview);
@@ -723,7 +821,7 @@ const initSessionNotes = () => {
 
     const blockActions = document.createElement("div");
     blockActions.className = "note-block-actions";
-    blockActions.hidden = !canEditNotes();
+    blockActions.hidden = !canDeleteNotes();
 
     const deleteButton = document.createElement("button");
     deleteButton.className = "session-button secondary note-card-button note-block-delete";
@@ -785,7 +883,7 @@ const initSessionNotes = () => {
         className: "note-comment-composer",
         value: state.commentDrafts[block.id] ?? "",
         placeholder: "이 사진 블록에 댓글을 남기세요.",
-        submitLabel: "댓글 올리기",
+        submitLabel: "올리기",
         onInput: (value) => {
           state.commentDrafts[block.id] = value;
         },
@@ -798,7 +896,6 @@ const initSessionNotes = () => {
         minHeight: 68,
       });
 
-      commentPane.appendChild(composer);
       commentPane.appendChild(composer);
     }
 
@@ -849,33 +946,33 @@ const initSessionNotes = () => {
       await persistAllNotes(`노트 ${currentNoteIndex + 1}번을 ${formatter.format(new Date())}에 저장했습니다.`);
     });
 
-    const deleteButton = document.createElement("button");
-    deleteButton.className = "session-button secondary note-card-button note-card-delete";
-    deleteButton.type = "button";
-    deleteButton.textContent = "삭제";
-    deleteButton.dataset.noteIndex = String(noteIndex);
-    deleteButton.addEventListener("click", async (event) => {
-      const currentNoteIndex = Number(event.currentTarget.dataset.noteIndex);
-      const deletedNote = state.notes[currentNoteIndex];
-      const deletedBlockIds = (deletedNote?.blocks ?? []).map((block) => block.id).filter(Boolean);
+    headActions.appendChild(saveButton);
 
-      state.notes.splice(currentNoteIndex, 1);
-      deletedBlockIds.forEach((blockId) => {
-        delete state.blockComments[blockId];
-        delete state.commentDrafts[blockId];
+    if (canDeleteNotes()) {
+      const deleteButton = document.createElement("button");
+      deleteButton.className = "session-button secondary note-card-button note-card-delete";
+      deleteButton.type = "button";
+      deleteButton.textContent = "삭제";
+      deleteButton.dataset.noteIndex = String(noteIndex);
+      deleteButton.addEventListener("click", async (event) => {
+        const currentNoteIndex = Number(event.currentTarget.dataset.noteIndex);
+        const deletedNote = state.notes[currentNoteIndex];
+
+        if (!deletedNote) {
+          return;
+        }
+
+        state.notes[currentNoteIndex] = {
+          ...deletedNote,
+          deletedAt: new Date().toISOString(),
+          deletedByEmail: state.userEmail,
+        };
+        render();
+        await persistAllNotes("노트를 삭제했습니다. 필요하면 복원할 수 있습니다.");
       });
-      render();
 
-      try {
-        await deleteSessionBlockCommentsByBlockIds(sessionKey, deletedBlockIds);
-      } catch (error) {
-        setStatus(error?.message ?? "노트 댓글을 삭제하지 못했습니다.");
-      }
-
-      await persistAllNotes(state.notes.length === 0 ? "노트를 비웠습니다." : "노트를 삭제했습니다.");
-    });
-
-    headActions.append(saveButton, deleteButton);
+      headActions.appendChild(deleteButton);
+    }
     head.append(title, headActions);
     card.appendChild(head);
 
@@ -931,18 +1028,106 @@ const initSessionNotes = () => {
     return card;
   };
 
+  const createDeletedNoteCard = (note, noteIndex) => {
+    const card = document.createElement("article");
+    card.className = "note-card note-card-deleted";
+    card.dataset.noteIndex = String(noteIndex);
+
+    const head = document.createElement("div");
+    head.className = "deleted-note-head";
+
+    const copy = document.createElement("div");
+    copy.className = "deleted-note-copy";
+
+    const title = document.createElement("strong");
+    title.className = "deleted-note-title";
+    title.textContent = note.title || "제목 없는 노트";
+
+    const meta = document.createElement("span");
+    meta.className = "deleted-note-meta";
+    if (note.deletedAt) {
+      const deletedBy = note.deletedByEmail
+        ? ` · ${note.deletedByEmail.split("@")[0]}`
+        : "";
+      meta.textContent = `${formatter.format(new Date(note.deletedAt))}에 삭제됨${deletedBy}`;
+    } else {
+      meta.textContent = "삭제된 노트";
+    }
+
+    copy.append(title, meta);
+
+    head.appendChild(copy);
+
+    if (canDeleteNotes()) {
+      const restoreButton = document.createElement("button");
+      restoreButton.className = "session-button secondary note-card-button";
+      restoreButton.type = "button";
+      restoreButton.textContent = "복원";
+      restoreButton.addEventListener("click", async () => {
+        state.notes[noteIndex] = {
+          ...state.notes[noteIndex],
+          deletedAt: "",
+          deletedByEmail: "",
+        };
+        render();
+        await persistAllNotes("삭제된 노트를 복원했습니다.");
+      });
+
+      head.appendChild(restoreButton);
+    }
+    card.appendChild(head);
+    return card;
+  };
+
   const render = () => {
     board.innerHTML = "";
     createButton.hidden = !canEditNotes();
 
-    if (state.notes.length === 0) {
+    const activeEntries = [];
+    const deletedEntries = [];
+
+    state.notes.forEach((note, noteIndex) => {
+      if (note.deletedAt) {
+        deletedEntries.push({ note, noteIndex });
+      } else {
+        activeEntries.push({ note, noteIndex });
+      }
+    });
+
+    if (activeEntries.length === 0 && deletedEntries.length === 0) {
       createEmptyState();
       return;
     }
 
-    state.notes.forEach((note, noteIndex) => {
+    if (activeEntries.length === 0 && deletedEntries.length > 0) {
+      const empty = document.createElement("div");
+      empty.className = "note-empty note-empty-static";
+      empty.innerHTML = `
+        <strong>표시 중인 노트가 없습니다</strong>
+        <span>삭제된 노트만 남아 있습니다. 아래에서 복원할 수 있습니다.</span>
+      `;
+      board.appendChild(empty);
+    }
+
+    activeEntries.forEach(({ note, noteIndex }) => {
       board.appendChild(createNoteCard(note, noteIndex));
     });
+
+    if (canDeleteNotes() && deletedEntries.length > 0) {
+      const deletedSection = document.createElement("section");
+      deletedSection.className = "deleted-note-stack";
+
+      const heading = document.createElement("p");
+      heading.className = "deleted-note-heading";
+      heading.textContent = `삭제된 노트 ${deletedEntries.length}개`;
+
+      deletedSection.appendChild(heading);
+      deletedEntries.forEach(({ note, noteIndex }) => {
+        deletedSection.appendChild(createDeletedNoteCard(note, noteIndex));
+      });
+
+      board.appendChild(deletedSection);
+    }
   };
 
   const restore = async () => {
