@@ -589,7 +589,6 @@ const initSessionNotes = () => {
 
     const actions = document.createElement("div");
     actions.className = "note-block-actions";
-    actions.dataset.adminOnly = "true";
     actions.hidden = !canEditNotes();
 
     const deleteButton = document.createElement("button");
@@ -652,7 +651,6 @@ const initSessionNotes = () => {
 
     const mediaActions = document.createElement("div");
     mediaActions.className = "note-media-actions";
-    mediaActions.dataset.adminOnly = "true";
     mediaActions.hidden = !canEditNotes();
 
     const uploadButton = document.createElement("button");
@@ -695,7 +693,6 @@ const initSessionNotes = () => {
     if (block.image) {
       const overlay = document.createElement("div");
       overlay.className = "note-media-overlay";
-      overlay.dataset.adminOnly = "true";
       overlay.hidden = !canEditNotes();
 
       overlay.appendChild(uploadButton);
@@ -726,7 +723,6 @@ const initSessionNotes = () => {
 
     const blockActions = document.createElement("div");
     blockActions.className = "note-block-actions";
-    blockActions.dataset.adminOnly = "true";
     blockActions.hidden = !canEditNotes();
 
     const deleteButton = document.createElement("button");
@@ -841,7 +837,6 @@ const initSessionNotes = () => {
 
     const headActions = document.createElement("div");
     headActions.className = "note-card-actions";
-    headActions.dataset.adminOnly = "true";
     headActions.hidden = !canEditNotes();
 
     const saveButton = document.createElement("button");
@@ -886,7 +881,6 @@ const initSessionNotes = () => {
 
     const toolbar = document.createElement("div");
     toolbar.className = "note-card-toolbar";
-    toolbar.dataset.adminOnly = "true";
     toolbar.hidden = !canEditNotes();
 
     const addBoxButton = document.createElement("button");
