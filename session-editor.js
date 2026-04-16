@@ -1,4 +1,4 @@
-import { subscribeAuthState } from "./supabase-auth.js?v=20260416-001";
+import { subscribeAuthState } from "./supabase-auth.js?v=20260416-002";
 import {
   createSessionBlockComment,
   deleteSessionBlockComment,
@@ -7,7 +7,7 @@ import {
   fetchSessionNotes,
   saveSessionNotes,
   updateSessionBlockComment,
-} from "./supabase-data.js?v=20260416-001";
+} from "./supabase-data.js?v=20260416-002";
 
 const initSessionNotes = () => {
   const board = document.querySelector("[data-note-board]");
@@ -48,6 +48,8 @@ const initSessionNotes = () => {
       status.textContent = message;
     }
   };
+
+  const canEditNotes = () => state.isAdmin || state.canEditSessionNotes;
 
   const resizeTextarea = (textarea, minHeight = 180) => {
     textarea.style.height = "0px";
@@ -991,4 +993,3 @@ if (document.readyState === "loading") {
 } else {
   initSessionNotes();
 }
-  const canEditNotes = () => state.isAdmin || state.canEditSessionNotes;
