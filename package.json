@@ -3,12 +3,18 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build:static": "node scripts/build-static.mjs",
     "admin:doctor": "node scripts/admin/doctor.mjs",
     "db:query": "node scripts/admin/run-sql.mjs",
-    "auth:admin": "node scripts/admin/auth-admin.mjs"
+    "auth:admin": "node scripts/admin/auth-admin.mjs",
+    "deploy": "npm run build:static && wrangler deploy",
+    "preview": "npm run build:static && wrangler dev"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
     "postgres": "^3.4.7"
+  },
+  "devDependencies": {
+    "wrangler": "^4.83.0"
   }
 }

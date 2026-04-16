@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Linear Algebra Journey social preview">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141d13" />
+      <stop offset="100%" stop-color="#253221" />
+    </linearGradient>
+    <linearGradient id="path" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f3ca4d" />
+      <stop offset="100%" stop-color="#8ede56" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <rect x="56" y="56" width="1088" height="518" rx="34" fill="#202d1f" stroke="#f6f5ea" stroke-opacity="0.14" />
+  <text x="96" y="170" fill="#b3bea8" font-family="Avenir Next, Trebuchet MS, sans-serif" font-size="26" letter-spacing="5">
+    LINEAR ALGEBRA COURSE
+  </text>
+  <text x="96" y="280" fill="#f6f5ea" font-family="Georgia, serif" font-size="82" font-weight="700">
+    Journey Map
+  </text>
+  <text x="96" y="348" fill="#b3bea8" font-family="Avenir Next, Trebuchet MS, sans-serif" font-size="32">
+    Game-like progress tracking for Strang's linear algebra chapters.
+  </text>
+  <path d="M710 150 L860 150 L860 250 L760 250 L760 350 L930 350 L930 470" fill="none" stroke="url(#path)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="710" cy="150" r="34" fill="#8ede56" />
+  <circle cx="860" cy="150" r="34" fill="#f3ca4d" />
+  <circle cx="760" cy="250" r="34" fill="#56624d" />
+  <circle cx="760" cy="350" r="34" fill="#56624d" />
+  <circle cx="930" cy="350" r="34" fill="#56624d" />
+  <circle cx="930" cy="470" r="34" fill="#56624d" />
+  <text x="696" y="160" fill="#132012" font-family="Avenir Next, Trebuchet MS, sans-serif" font-size="26" font-weight="800">1</text>
+  <text x="846" y="160" fill="#3c2f05" font-family="Avenir Next, Trebuchet MS, sans-serif" font-size="26" font-weight="800">2</text>
+</svg>

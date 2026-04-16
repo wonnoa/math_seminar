@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>세션 기록 | 선형대수 스터디 여정</title>
+    <meta
+      name="description"
+      content="날짜별 세션 기록을 모아보는 선형대수 스터디 페이지입니다."
+    />
+    <meta
+      name="robots"
+      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
+    />
+    <link rel="canonical" href="https://mathlearn.wonnoa91.workers.dev/sessions" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="./site.webmanifest" />
+    <link rel="stylesheet" href="./styles.css?v=20260416-006" />
+  </head>
+  <body>
+    <div class="app-layout">
+      <aside class="app-sidebar" aria-label="기본 탐색">
+        <div class="sidebar-frame">
+          <div class="sidebar-brand">
+            <p class="eyebrow">학습 탐색</p>
+            <h2>선형대수 허브</h2>
+          </div>
+
+          <nav class="sidebar-nav">
+            <a class="nav-slot nav-slot-labeled" href="./index.html" aria-label="홈">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">홈</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./member.html" aria-label="멤버">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">멤버</span></span>
+            </a>
+            <a
+              class="nav-slot nav-slot-labeled active"
+              href="./sessions.html"
+              aria-label="세션"
+              aria-current="page"
+            >
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">세션</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./progress.html" aria-label="진행 상황">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">진행 상황</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./future.html" aria-label="미래 지향">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">미래 지향</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./notice.html" aria-label="공지사항">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">공지사항</span></span>
+            </a>
+          </nav>
+        </div>
+      </aside>
+
+      <div class="page-shell">
+        <header class="blueprint-header">
+          <p class="eyebrow">세션 기록</p>
+          <h1>세션</h1>
+        </header>
+
+        <main class="page-stack">
+          <section class="content-panel">
+            <div class="session-board-head">
+              <div>
+                <h2>날짜별 세션노트</h2>
+              </div>
+              <div class="session-board-actions">
+                <button class="session-button secondary" type="button" data-session-restore hidden>숨김 복원</button>
+                <button class="session-button" type="button" data-session-create data-admin-only hidden>새 세션 만들기</button>
+              </div>
+            </div>
+            <form class="session-create-form" data-session-create-form hidden>
+              <label class="session-create-field">
+                <span>날짜</span>
+                <input class="session-create-input" type="date" data-session-date-input required />
+              </label>
+              <label class="session-create-field">
+                <span>제목</span>
+                <input
+                  class="session-create-input"
+                  type="text"
+                  data-session-title-input
+                  placeholder="예: 섹션 2.5 본문"
+                />
+              </label>
+              <div class="session-create-actions">
+                <button class="session-button" type="submit">세션 만들기</button>
+                <button class="session-button secondary" type="button" data-session-cancel>닫기</button>
+              </div>
+            </form>
+            <p class="session-save-status" data-session-status>온라인 세션을 불러오는 중입니다.</p>
+            <div class="session-list-empty" data-session-empty hidden>아직 등록된 온라인 세션이 없습니다.</div>
+            <ul class="link-list" data-session-list></ul>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script type="module" src="./sessions-board.js?v=20260416-007"></script>
+  </body>
+</html>

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>공지사항 | 선형대수 스터디 여정</title>
+    <meta
+      name="description"
+      content="스터디 일정과 변동 사항을 정리하는 공지사항 페이지입니다."
+    />
+    <meta
+      name="robots"
+      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
+    />
+    <link rel="canonical" href="https://mathlearn.wonnoa91.workers.dev/notice" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="./site.webmanifest" />
+    <link rel="stylesheet" href="./styles.css?v=20260416-006" />
+  </head>
+  <body>
+    <div class="app-layout">
+      <aside class="app-sidebar" aria-label="기본 탐색">
+        <div class="sidebar-frame">
+          <div class="sidebar-brand">
+            <p class="eyebrow">학습 탐색</p>
+            <h2>선형대수 허브</h2>
+          </div>
+
+          <nav class="sidebar-nav">
+            <a class="nav-slot nav-slot-labeled" href="./index.html" aria-label="홈">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">홈</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./member.html" aria-label="멤버">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">멤버</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./sessions.html" aria-label="세션">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">세션</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./progress.html" aria-label="진행 상황">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">진행 상황</span></span>
+            </a>
+            <a class="nav-slot nav-slot-labeled" href="./future.html" aria-label="미래 지향">
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">미래 지향</span></span>
+            </a>
+            <a
+              class="nav-slot nav-slot-labeled active"
+              href="./notice.html"
+              aria-label="공지사항"
+              aria-current="page"
+            >
+              <span class="nav-slot-icon"></span>
+              <span class="nav-slot-copy"><span class="nav-slot-label">공지사항</span></span>
+            </a>
+          </nav>
+        </div>
+      </aside>
+
+      <div class="page-shell">
+        <header class="blueprint-header">
+          <p class="eyebrow">공지</p>
+          <h1>공지사항</h1>
+        </header>
+
+        <main class="page-stack">
+          <section class="content-panel notice-board-panel">
+            <article class="notice-list-card notice-list-card-pinned">
+              <a class="notice-list-link" href="./notice-main.html">
+                <div class="notice-list-top">
+                  <span class="notice-list-meta">고정 공지</span>
+                  <span class="notice-pin">상단 고정</span>
+                </div>
+                <h2 class="notice-list-title">메인 공지</h2>
+                <p class="notice-list-excerpt">
+                  스터디 운영 규칙, 진행 일정, 장소, 참여비, 교재 안내를 한곳에 모아둔 공지입니다.
+                </p>
+                <span class="inline-link">공지 보기</span>
+              </a>
+            </article>
+
+            <div class="notice-board-head">
+              <div>
+                <p class="spec-label">세션 공지</p>
+                <h2>날짜별 공지</h2>
+              </div>
+              <button class="session-button" type="button" data-notice-create hidden>공지 만들기</button>
+            </div>
+            <p class="session-save-status" data-notice-status>
+              아직 등록된 날짜별 공지가 없습니다.
+            </p>
+            <div class="notice-board" data-notice-board></div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script type="module" src="./notice-board.js?v=20260416-004"></script>
+  </body>
+</html>
