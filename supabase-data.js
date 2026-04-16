@@ -149,7 +149,7 @@ export async function createSessionNote(sessionKey, sessionDate, title = "") {
 export async function fetchSessionBlockComments(sessionKey) {
   const { data, error } = await supabase
     .from("session_block_comments")
-    .select("id, session_key, block_id, parent_id, body, author_email, created_at, updated_at")
+    .select("id, session_key, block_id, parent_id, body, tag, author_email, created_at, updated_at")
     .eq("session_key", sessionKey)
     .order("created_at", { ascending: true });
 
@@ -160,7 +160,13 @@ export async function fetchSessionBlockComments(sessionKey) {
   return data ?? [];
 }
 
-export async function createSessionBlockComment(sessionKey, blockId, body, parentId = null) {
+export async function createSessionBlockComment(
+  sessionKey,
+  blockId,
+  body,
+  parentId = null,
+  tag = "설명"
+) {
   requireCommentPermission();
 
   const authorEmail = getAuthState().user?.email?.toLowerCase() ?? "";
@@ -172,10 +178,11 @@ export async function createSessionBlockComment(sessionKey, blockId, body, paren
       block_id: blockId,
       parent_id: parentId,
       body,
+      tag,
       author_email: authorEmail,
       updated_at: new Date().toISOString(),
     })
-    .select("id, session_key, block_id, parent_id, body, author_email, created_at, updated_at")
+    .select("id, session_key, block_id, parent_id, body, tag, author_email, created_at, updated_at")
     .single();
 
   if (error) {
@@ -195,7 +202,7 @@ export async function updateSessionBlockComment(commentId, body) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", commentId)
-    .select("id, session_key, block_id, parent_id, body, author_email, created_at, updated_at")
+    .select("id, session_key, block_id, parent_id, body, tag, author_email, created_at, updated_at")
     .single();
 
   if (error) {

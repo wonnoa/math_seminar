@@ -278,6 +278,14 @@ const initSessionNotes = () => {
   const isOwnComment = (comment) =>
     Boolean(state.userEmail) && comment.author_email?.toLowerCase() === state.userEmail;
 
+  const formatCommentTag = (tag) => {
+    if (tag === "깨달음" || tag === "질문" || tag === "설명") {
+      return tag;
+    }
+
+    return "설명";
+  };
+
   const canEditComment = (comment) => state.isAdmin || (canWriteComments() && isOwnComment(comment));
 
   const canDeleteComment = (comment) => state.isAdmin || (canWriteComments() && isOwnComment(comment));
@@ -393,7 +401,7 @@ const initSessionNotes = () => {
     await persistAllNotes("박스를 삭제했습니다.");
   };
 
-  const submitComment = async ({ blockId, body, parentId = null }) => {
+  const submitComment = async ({ blockId, body, parentId = null, tag = "설명" }) => {
     if (!canWriteComments()) {
       return;
     }
@@ -406,7 +414,8 @@ const initSessionNotes = () => {
     }
 
     try {
-      await createSessionBlockComment(sessionKey, blockId, content, parentId);
+      const safeTag = formatCommentTag(tag);
+      await createSessionBlockComment(sessionKey, blockId, content, parentId, safeTag);
 
       if (parentId) {
         delete state.replyDrafts[parentId];
@@ -417,7 +426,7 @@ const initSessionNotes = () => {
 
       await refreshBlockComments();
       render();
-      setStatus(parentId ? "대댓글을 올렸습니다." : "댓글을 올렸습니다.");
+      setStatus(parentId ? `${safeTag} 대댓글을 올렸습니다.` : `${safeTag} 댓글을 올렸습니다.`);
     } catch (error) {
       setStatus(error?.message ?? "댓글을 저장하지 못했습니다.");
     }
@@ -470,7 +479,7 @@ const initSessionNotes = () => {
     className,
     value,
     placeholder,
-    submitLabel,
+    submitActions,
     onInput,
     onSubmit,
     minHeight = 68,
@@ -493,15 +502,22 @@ const initSessionNotes = () => {
     actions.className = "note-comment-composer-actions";
     actions.hidden = !canWriteComments();
 
-    const submitButton = document.createElement("button");
-    submitButton.className = "session-button note-card-button";
-    submitButton.type = "button";
-    submitButton.textContent = submitLabel;
-    submitButton.addEventListener("click", async () => {
-      await onSubmit();
-    });
+    const actionsConfig =
+      Array.isArray(submitActions) && submitActions.length > 0
+        ? submitActions
+        : [{ label: "설명", tag: "설명" }];
 
-    actions.appendChild(submitButton);
+    actionsConfig.forEach(({ label, tag }) => {
+      const submitButton = document.createElement("button");
+      submitButton.className = "session-button note-card-button note-comment-submit";
+      submitButton.type = "button";
+      submitButton.textContent = label;
+      submitButton.dataset.commentTag = tag;
+      submitButton.addEventListener("click", async () => {
+        await onSubmit(tag);
+      });
+      actions.appendChild(submitButton);
+    });
     wrapper.append(textarea, actions);
 
     requestAnimationFrame(() => resizeTextarea(textarea, minHeight));
@@ -517,15 +533,23 @@ const initSessionNotes = () => {
     const meta = document.createElement("div");
     meta.className = "note-comment-meta";
 
+    const metaLead = document.createElement("div");
+    metaLead.className = "note-comment-meta-lead";
+
     const author = document.createElement("strong");
     author.className = "note-comment-author";
     author.textContent = formatAuthor(comment.author_email);
+
+    const tag = document.createElement("span");
+    tag.className = "note-comment-tag";
+    tag.textContent = formatCommentTag(comment.tag);
 
     const time = document.createElement("span");
     time.className = "note-comment-time";
     time.textContent = formatter.format(new Date(comment.updated_at || comment.created_at));
 
-    meta.append(author, time);
+    metaLead.append(author, tag);
+    meta.append(metaLead, time);
 
     const body = document.createElement("div");
     body.className = "note-comment-body";
@@ -633,15 +657,20 @@ const initSessionNotes = () => {
         className: "note-comment-reply-composer",
         value: state.replyDrafts[comment.id] ?? "",
         placeholder: "대댓글을 입력하세요.",
-        submitLabel: "올리기",
+        submitActions: [
+          { label: "깨달음", tag: "깨달음" },
+          { label: "질문", tag: "질문" },
+          { label: "설명", tag: "설명" },
+        ],
         onInput: (value) => {
           state.replyDrafts[comment.id] = value;
         },
-        onSubmit: async () => {
+        onSubmit: async (tag) => {
           await submitComment({
             blockId: comment.block_id,
             body: state.replyDrafts[comment.id] ?? "",
             parentId: comment.id,
+            tag,
           });
         },
         minHeight: 60,
@@ -883,14 +912,19 @@ const initSessionNotes = () => {
         className: "note-comment-composer",
         value: state.commentDrafts[block.id] ?? "",
         placeholder: "이 사진 블록에 댓글을 남기세요.",
-        submitLabel: "올리기",
+        submitActions: [
+          { label: "깨달음", tag: "깨달음" },
+          { label: "질문", tag: "질문" },
+          { label: "설명", tag: "설명" },
+        ],
         onInput: (value) => {
           state.commentDrafts[block.id] = value;
         },
-        onSubmit: async () => {
+        onSubmit: async (tag) => {
           await submitComment({
             blockId: block.id,
             body: state.commentDrafts[block.id] ?? "",
+            tag,
           });
         },
         minHeight: 68,

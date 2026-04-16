@@ -1615,9 +1615,30 @@ body::after {
   align-items: center;
 }
 
+.note-comment-meta-lead {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
 .note-comment-author {
   color: var(--ink);
   font-size: 0.8rem;
+}
+
+.note-comment-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(167, 233, 90, 0.22);
+  background: rgba(167, 233, 90, 0.08);
+  color: rgba(208, 255, 153, 0.95);
+  font-size: 0.68rem;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .note-comment-time {
@@ -1650,6 +1671,10 @@ body::after {
   padding: 4px 8px;
   font-size: 0.72rem;
   border-radius: 8px;
+}
+
+.note-comment-submit {
+  min-width: 64px !important;
 }
 
 .note-comment-composer,
