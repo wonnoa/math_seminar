@@ -17,6 +17,7 @@ const state = {
   ready: false,
   isAdmin: false,
   canComment: false,
+  canEditSessionNotes: false,
   canManageMemberCard: false,
   canManageNotices: false,
   user: null,
@@ -29,6 +30,7 @@ function emitState() {
   const snapshot = { ...state };
   document.body.dataset.admin = snapshot.isAdmin ? "true" : "false";
   document.body.dataset.canComment = snapshot.canComment ? "true" : "false";
+  document.body.dataset.canEditSessionNotes = snapshot.canEditSessionNotes ? "true" : "false";
   document.body.dataset.canManageMemberCard = snapshot.canManageMemberCard ? "true" : "false";
   document.body.dataset.canManageNotices = snapshot.canManageNotices ? "true" : "false";
   document.body.dataset.authReady = snapshot.ready ? "true" : "false";
@@ -53,14 +55,59 @@ async function checkAdmin(email) {
   return Boolean(data);
 }
 
-async function fetchPermissions(email) {
+async function fetchPermissions(user) {
+  const email = user?.email?.toLowerCase?.() ?? "";
+  const userId = user?.id ?? null;
+
   if (!email) {
     return {
       isAdmin: false,
       canComment: false,
+      canEditSessionNotes: false,
       canManageMemberCard: false,
       canManageNotices: false,
     };
+  }
+
+  try {
+    const { data, error } = await supabase.rpc("get_my_permissions");
+
+    if (!error && data) {
+      const row = Array.isArray(data) ? data[0] : data;
+      const isAdmin = Boolean(row?.is_admin);
+
+      return {
+        isAdmin,
+        canComment: isAdmin || Boolean(row?.can_comment),
+        canEditSessionNotes: isAdmin || Boolean(row?.can_edit_session_notes),
+        canManageMemberCard: isAdmin || Boolean(row?.can_manage_member_card),
+        canManageNotices: isAdmin || Boolean(row?.can_manage_notices),
+      };
+    }
+  } catch {
+    // Fall through to legacy table reads.
+  }
+
+  let profileRow = null;
+
+  try {
+    let query = supabase
+      .from("profiles")
+      .select("*");
+
+    if (userId) {
+      query = query.eq("user_id", userId);
+    } else {
+      query = query.eq("email", email);
+    }
+
+    const { data, error } = await query.maybeSingle();
+
+    if (!error) {
+      profileRow = data;
+    }
+  } catch {
+    profileRow = null;
   }
 
   let permissionRow = null;
@@ -80,13 +127,23 @@ async function fetchPermissions(email) {
   }
 
   const legacyAdmin = await checkAdmin(email).catch(() => false);
-  const isAdmin = legacyAdmin || Boolean(permissionRow?.is_admin);
+  const isAdmin =
+    legacyAdmin ||
+    Boolean(profileRow?.is_admin) ||
+    Boolean(permissionRow?.is_admin);
 
   return {
     isAdmin,
-    canComment: isAdmin || Boolean(permissionRow?.can_comment),
-    canManageMemberCard: isAdmin || Boolean(permissionRow?.can_manage_member_card),
-    canManageNotices: isAdmin || Boolean(permissionRow?.can_manage_notices),
+    canComment: isAdmin || Boolean(profileRow?.can_comment ?? permissionRow?.can_comment),
+    canEditSessionNotes:
+      isAdmin ||
+      Boolean(profileRow?.can_edit_session_notes),
+    canManageMemberCard:
+      isAdmin ||
+      Boolean(profileRow?.can_manage_member_card ?? permissionRow?.can_manage_member_card),
+    canManageNotices:
+      isAdmin ||
+      Boolean(profileRow?.can_manage_notices ?? permissionRow?.can_manage_notices),
   };
 }
 
@@ -103,10 +160,11 @@ export async function refreshAuthState() {
 
     const user = session?.user ?? null;
     const permissions = user?.email
-      ? await fetchPermissions(user.email)
+      ? await fetchPermissions(user)
       : {
           isAdmin: false,
           canComment: false,
+          canEditSessionNotes: false,
           canManageMemberCard: false,
           canManageNotices: false,
         };
@@ -115,6 +173,7 @@ export async function refreshAuthState() {
     state.user = user;
     state.isAdmin = permissions.isAdmin;
     state.canComment = permissions.canComment;
+    state.canEditSessionNotes = permissions.canEditSessionNotes;
     state.canManageMemberCard = permissions.canManageMemberCard;
     state.canManageNotices = permissions.canManageNotices;
     state.error = "";
@@ -123,6 +182,7 @@ export async function refreshAuthState() {
     state.user = null;
     state.isAdmin = false;
     state.canComment = false;
+    state.canEditSessionNotes = false;
     state.canManageMemberCard = false;
     state.canManageNotices = false;
     state.error = error?.message ?? "Supabase 연결을 확인할 수 없습니다.";
@@ -313,6 +373,10 @@ function buildAuthPanel() {
 
       if (nextState.canComment) {
         enabled.push("댓글");
+      }
+
+      if (nextState.canEditSessionNotes) {
+        enabled.push("세션 노트");
       }
 
       if (nextState.canManageMemberCard) {

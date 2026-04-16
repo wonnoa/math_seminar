@@ -1,4 +1,4 @@
-import { getAuthState, supabase } from "./supabase-auth.js?v=20260414-001";
+import { getAuthState, supabase } from "./supabase-auth.js?v=20260416-001";
 
 function requireAdmin() {
   if (!getAuthState().isAdmin) {
@@ -11,6 +11,14 @@ function requireCommentPermission() {
 
   if (!(auth.isAdmin || auth.canComment)) {
     throw new Error("댓글 권한이 필요합니다.");
+  }
+}
+
+function requireSessionNotePermission() {
+  const auth = getAuthState();
+
+  if (!(auth.isAdmin || auth.canEditSessionNotes)) {
+    throw new Error("세션 노트 편집 권한이 필요합니다.");
   }
 }
 
@@ -88,7 +96,7 @@ export async function fetchSessionNoteList() {
 }
 
 export async function saveSessionNotes(sessionKey, title, notes) {
-  requireAdmin();
+  requireSessionNotePermission();
 
   const sessionDate = sessionKey.replace("session-", "");
   const { error } = await supabase.from("session_notes").upsert(
@@ -192,7 +200,7 @@ export async function updateSessionBlockComment(commentId, body) {
 }
 
 export async function deleteSessionBlockCommentsByBlockIds(sessionKey, blockIds) {
-  requireAdmin();
+  requireSessionNotePermission();
 
   if (!Array.isArray(blockIds) || blockIds.length === 0) {
     return;

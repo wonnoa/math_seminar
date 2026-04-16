@@ -1,4 +1,4 @@
-import { subscribeAuthState } from "./supabase-auth.js?v=20260414-001";
+import { subscribeAuthState } from "./supabase-auth.js?v=20260416-001";
 import {
   createSessionBlockComment,
   deleteSessionBlockComment,
@@ -7,7 +7,7 @@ import {
   fetchSessionNotes,
   saveSessionNotes,
   updateSessionBlockComment,
-} from "./supabase-data.js?v=20260414-001";
+} from "./supabase-data.js?v=20260416-001";
 
 const initSessionNotes = () => {
   const board = document.querySelector("[data-note-board]");
@@ -35,6 +35,7 @@ const initSessionNotes = () => {
     openEditForms: {},
     isAdmin: false,
     canComment: false,
+    canEditSessionNotes: false,
     userEmail: "",
   };
 
@@ -213,10 +214,10 @@ const initSessionNotes = () => {
     empty.className = "note-empty";
     empty.innerHTML = `
       <strong>아직 노트가 없습니다</strong>
-      <span>${state.isAdmin ? "노트를 만들어 기록을 시작하세요." : "관리자가 세션 노트를 작성하면 여기에 표시됩니다."}</span>
+      <span>${canEditNotes() ? "노트를 만들어 기록을 시작하세요." : "권한이 있는 사용자가 세션 노트를 작성하면 여기에 표시됩니다."}</span>
     `;
 
-    if (state.isAdmin) {
+    if (canEditNotes()) {
       empty.addEventListener("click", addNote);
     }
 
@@ -233,7 +234,7 @@ const initSessionNotes = () => {
   };
 
   const addNote = () => {
-    if (!state.isAdmin) {
+    if (!canEditNotes()) {
       return;
     }
 
@@ -253,7 +254,7 @@ const initSessionNotes = () => {
   const canWriteComments = () => state.isAdmin || state.canComment;
 
   const addBlockToNote = (noteIndex, type) => {
-    if (!state.isAdmin) {
+    if (!canEditNotes()) {
       return;
     }
 
@@ -281,7 +282,7 @@ const initSessionNotes = () => {
   };
 
   const deleteBlock = async (noteIndex, blockIndex) => {
-    if (!state.isAdmin) {
+    if (!canEditNotes()) {
       return;
     }
 
@@ -587,7 +588,7 @@ const initSessionNotes = () => {
     const actions = document.createElement("div");
     actions.className = "note-block-actions";
     actions.dataset.adminOnly = "true";
-    actions.hidden = !state.isAdmin;
+    actions.hidden = !canEditNotes();
 
     const deleteButton = document.createElement("button");
     deleteButton.className = "session-button secondary note-card-button note-block-delete";
@@ -603,7 +604,7 @@ const initSessionNotes = () => {
     textarea.className = "note-textarea note-block-textarea";
     textarea.placeholder = "여기에 적으세요.";
     textarea.value = block.text ?? "";
-    textarea.readOnly = !state.isAdmin;
+    textarea.readOnly = !canEditNotes();
     textarea.dataset.noteIndex = String(noteIndex);
     textarea.dataset.blockIndex = String(blockIndex);
 
@@ -642,7 +643,7 @@ const initSessionNotes = () => {
       empty.className = "note-image-empty";
       empty.innerHTML = `
         <strong>아직 사진이 없습니다</strong>
-        <span>${state.isAdmin ? "이 블록에 사진을 추가하세요." : "등록된 사진이 없습니다."}</span>
+        <span>${canEditNotes() ? "이 블록에 사진을 추가하세요." : "등록된 사진이 없습니다."}</span>
       `;
       mediaPane.appendChild(empty);
     }
@@ -650,7 +651,7 @@ const initSessionNotes = () => {
     const mediaActions = document.createElement("div");
     mediaActions.className = "note-media-actions";
     mediaActions.dataset.adminOnly = "true";
-    mediaActions.hidden = !state.isAdmin;
+    mediaActions.hidden = !canEditNotes();
 
     const uploadButton = document.createElement("button");
     uploadButton.className = "session-button secondary note-card-button note-upload-label";
@@ -693,7 +694,7 @@ const initSessionNotes = () => {
       const overlay = document.createElement("div");
       overlay.className = "note-media-overlay";
       overlay.dataset.adminOnly = "true";
-      overlay.hidden = !state.isAdmin;
+      overlay.hidden = !canEditNotes();
 
       overlay.appendChild(uploadButton);
 
@@ -724,7 +725,7 @@ const initSessionNotes = () => {
     const blockActions = document.createElement("div");
     blockActions.className = "note-block-actions";
     blockActions.dataset.adminOnly = "true";
-    blockActions.hidden = !state.isAdmin;
+    blockActions.hidden = !canEditNotes();
 
     const deleteButton = document.createElement("button");
     deleteButton.className = "session-button secondary note-card-button note-block-delete";
@@ -770,7 +771,7 @@ const initSessionNotes = () => {
       empty.className = "note-comment-empty";
       empty.innerHTML = `
         <strong>아직 댓글이 없습니다</strong>
-        <span>${state.isAdmin ? "이 블록에 첫 댓글을 남겨보세요." : "새로고침하면 새 댓글을 볼 수 있습니다."}</span>
+        <span>${canWriteComments() ? "이 블록에 첫 댓글을 남겨보세요." : "새로고침하면 새 댓글을 볼 수 있습니다."}</span>
       `;
       thread.appendChild(empty);
     } else {
@@ -781,7 +782,7 @@ const initSessionNotes = () => {
 
     commentPane.appendChild(thread);
 
-    if (state.isAdmin) {
+    if (canWriteComments()) {
       const composer = createCommentComposer({
         className: "note-comment-composer",
         value: state.commentDrafts[block.id] ?? "",
@@ -800,24 +801,6 @@ const initSessionNotes = () => {
       });
 
       commentPane.appendChild(composer);
-    } else if (state.canComment) {
-      const composer = createCommentComposer({
-        className: "note-comment-composer",
-        value: state.commentDrafts[block.id] ?? "",
-        placeholder: "이 사진 블록에 댓글을 남기세요.",
-        submitLabel: "댓글 올리기",
-        onInput: (value) => {
-          state.commentDrafts[block.id] = value;
-        },
-        onSubmit: async () => {
-          await submitComment({
-            blockId: block.id,
-            body: state.commentDrafts[block.id] ?? "",
-          });
-        },
-        minHeight: 68,
-      });
-
       commentPane.appendChild(composer);
     }
 
@@ -846,7 +829,7 @@ const initSessionNotes = () => {
     title.placeholder = "제목 없는 노트";
     title.value = note.title ?? "";
     title.dataset.noteIndex = String(noteIndex);
-    title.readOnly = !state.isAdmin;
+    title.readOnly = !canEditNotes();
 
     title.addEventListener("input", (event) => {
       const currentNoteIndex = Number(event.currentTarget.dataset.noteIndex);
@@ -857,7 +840,7 @@ const initSessionNotes = () => {
     const headActions = document.createElement("div");
     headActions.className = "note-card-actions";
     headActions.dataset.adminOnly = "true";
-    headActions.hidden = !state.isAdmin;
+    headActions.hidden = !canEditNotes();
 
     const saveButton = document.createElement("button");
     saveButton.className = "session-button note-card-button";
@@ -902,7 +885,7 @@ const initSessionNotes = () => {
     const toolbar = document.createElement("div");
     toolbar.className = "note-card-toolbar";
     toolbar.dataset.adminOnly = "true";
-    toolbar.hidden = !state.isAdmin;
+    toolbar.hidden = !canEditNotes();
 
     const addBoxButton = document.createElement("button");
     addBoxButton.className = "session-button secondary note-card-button";
@@ -933,7 +916,7 @@ const initSessionNotes = () => {
       empty.className = "note-block-empty";
       empty.innerHTML = `
         <strong>아직 블록이 없습니다</strong>
-        <span>${state.isAdmin ? "텍스트 박스나 사진 박스를 추가해 기록을 채워보세요." : "관리자가 내용을 추가하면 여기에 표시됩니다."}</span>
+        <span>${canEditNotes() ? "텍스트 박스나 사진 박스를 추가해 기록을 채워보세요." : "권한이 있는 사용자가 내용을 추가하면 여기에 표시됩니다."}</span>
       `;
       body.appendChild(empty);
     } else {
@@ -954,7 +937,7 @@ const initSessionNotes = () => {
 
   const render = () => {
     board.innerHTML = "";
-    createButton.hidden = !state.isAdmin;
+    createButton.hidden = !canEditNotes();
 
     if (state.notes.length === 0) {
       createEmptyState();
@@ -994,6 +977,7 @@ const initSessionNotes = () => {
   subscribeAuthState((authState) => {
     state.isAdmin = authState.isAdmin;
     state.canComment = authState.canComment;
+    state.canEditSessionNotes = authState.canEditSessionNotes;
     state.userEmail = authState.user?.email?.toLowerCase() ?? "";
     render();
   });
@@ -1007,3 +991,4 @@ if (document.readyState === "loading") {
 } else {
   initSessionNotes();
 }
+  const canEditNotes = () => state.isAdmin || state.canEditSessionNotes;
