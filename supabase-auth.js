@@ -218,7 +218,7 @@ export async function signInAdmin(email, password) {
 
 export async function signOutAdmin() {
   const { error } = await supabase.auth.signOut();
-  if (error) {
+  if (error && error.message !== "Auth session missing!") {
     throw error;
   }
   return refreshAuthState();
