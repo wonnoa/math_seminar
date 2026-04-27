@@ -1,5 +1,10 @@
 import { subscribeAuthState } from "./supabase-auth.js?v=20260416-004";
-import { createSessionNote, fetchSessionNoteList } from "./supabase-data.js?v=20260416-004";
+import {
+  createSessionNote,
+  fetchSessionNoteList,
+  hideSessionNote,
+  restoreHiddenSessionNotes,
+} from "./supabase-data.js?v=20260427-001";
 
 const list = document.querySelector("[data-session-list]");
 
@@ -27,14 +32,14 @@ if (list) {
     }
   }
 
-  function getHiddenStorageKey() {
+  function getLegacyHiddenStorageKey() {
     const scope = currentUserEmail || "guest";
     return `math-seminar.hidden-sessions.v1:${scope}`;
   }
 
-  function readHiddenSessionKeys() {
+  function readLegacyHiddenSessionKeys() {
     try {
-      const raw = window.localStorage.getItem(getHiddenStorageKey());
+      const raw = window.localStorage.getItem(getLegacyHiddenStorageKey());
       const parsed = raw ? JSON.parse(raw) : [];
       return Array.isArray(parsed) ? parsed : [];
     } catch {
@@ -42,18 +47,8 @@ if (list) {
     }
   }
 
-  function writeHiddenSessionKeys(keys) {
-    window.localStorage.setItem(getHiddenStorageKey(), JSON.stringify(keys));
-  }
-
-  function hideSession(sessionKey) {
-    const keys = new Set(readHiddenSessionKeys());
-    keys.add(sessionKey);
-    writeHiddenSessionKeys([...keys]);
-  }
-
-  function clearHiddenSessions() {
-    window.localStorage.removeItem(getHiddenStorageKey());
+  function clearLegacyHiddenSessions() {
+    window.localStorage.removeItem(getLegacyHiddenStorageKey());
   }
 
   function getTodayString() {
@@ -113,7 +108,6 @@ if (list) {
 
   function renderSessionList(entries) {
     list.innerHTML = "";
-    const hiddenKeys = new Set(readHiddenSessionKeys());
 
     const sortedEntries = [...entries].sort((left, right) => {
       const leftTime = left?.session_date ? Date.parse(`${left.session_date}T00:00:00`) : 0;
@@ -121,14 +115,15 @@ if (list) {
       return rightTime - leftTime;
     });
 
-    const visibleEntries = sortedEntries.filter((entry) => !hiddenKeys.has(entry.session_key));
+    const visibleEntries = sortedEntries.filter((entry) => !entry.hidden_at);
+    const hiddenCount = sortedEntries.length - visibleEntries.length;
 
     if (empty) {
       empty.hidden = visibleEntries.length > 0;
     }
 
     if (restoreButton) {
-      restoreButton.hidden = !isAdmin || hiddenKeys.size === 0;
+      restoreButton.hidden = !isAdmin || hiddenCount === 0;
     }
 
     for (const entry of visibleEntries) {
@@ -160,12 +155,19 @@ if (list) {
         hideButton.className = "session-button secondary session-hide-button";
         hideButton.type = "button";
         hideButton.textContent = "삭제";
-        hideButton.addEventListener("click", (event) => {
+        hideButton.addEventListener("click", async (event) => {
           event.preventDefault();
           event.stopPropagation();
-          hideSession(entry.session_key);
-          renderSessionList(entries);
-          setStatus("세션 카드를 현재 브라우저에서 숨겼습니다.");
+
+          hideButton.disabled = true;
+          try {
+            await hideSessionNote(entry.session_key);
+            await loadSessions();
+            setStatus("세션 카드를 전체 목록에서 숨겼습니다.");
+          } catch (error) {
+            hideButton.disabled = false;
+            window.alert(error?.message ?? "세션 카드를 숨기지 못했습니다.");
+          }
         });
 
         row.appendChild(hideButton);
@@ -178,7 +180,17 @@ if (list) {
 
   async function loadSessions() {
     try {
-      const entries = await fetchSessionNoteList();
+      let entries = await fetchSessionNoteList({ includeHidden: isAdmin });
+
+      if (isAdmin) {
+        const legacyHiddenKeys = readLegacyHiddenSessionKeys();
+        if (legacyHiddenKeys.length > 0) {
+          await Promise.all(legacyHiddenKeys.map((sessionKey) => hideSessionNote(sessionKey)));
+          clearLegacyHiddenSessions();
+          entries = await fetchSessionNoteList({ includeHidden: true });
+        }
+      }
+
       renderSessionList(entries);
       setStatus(entries.length > 0 ? "날짜별 세션노트" : "");
     } catch (error) {
@@ -211,10 +223,18 @@ if (list) {
   createButton?.addEventListener("click", openCreateForm);
   cancelButton?.addEventListener("click", closeCreateForm);
   createForm?.addEventListener("submit", handleCreateSession);
-  restoreButton?.addEventListener("click", () => {
-    clearHiddenSessions();
-    loadSessions();
-    setStatus("숨긴 세션 카드를 다시 표시했습니다.");
+  restoreButton?.addEventListener("click", async () => {
+    try {
+      restoreButton.disabled = true;
+      clearLegacyHiddenSessions();
+      await restoreHiddenSessionNotes();
+      await loadSessions();
+      setStatus("숨긴 세션 카드를 다시 표시했습니다.");
+    } catch (error) {
+      window.alert(error?.message ?? "숨긴 세션 카드를 복원하지 못했습니다.");
+    } finally {
+      restoreButton.disabled = false;
+    }
   });
 
   subscribeAuthState((authState) => {

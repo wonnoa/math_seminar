@@ -72,6 +72,7 @@ export async function fetchSessionNotes(sessionKey) {
     .from("session_notes")
     .select("session_key, session_date, title, notes, updated_at")
     .eq("session_key", sessionKey)
+    .is("hidden_at", null)
     .maybeSingle();
 
   if (error) {
@@ -81,10 +82,16 @@ export async function fetchSessionNotes(sessionKey) {
   return data;
 }
 
-export async function fetchSessionNoteList() {
-  const { data, error } = await supabase
+export async function fetchSessionNoteList({ includeHidden = false } = {}) {
+  let query = supabase
     .from("session_notes")
-    .select("session_key, session_date, title, updated_at")
+    .select("session_key, session_date, title, updated_at, hidden_at, hidden_by_email");
+
+  if (!includeHidden) {
+    query = query.is("hidden_at", null);
+  }
+
+  const { data, error } = await query
     .order("session_date", { ascending: false })
     .order("updated_at", { ascending: false });
 
@@ -93,6 +100,40 @@ export async function fetchSessionNoteList() {
   }
 
   return data ?? [];
+}
+
+export async function hideSessionNote(sessionKey) {
+  requireAdmin();
+
+  const { error } = await supabase
+    .from("session_notes")
+    .update({
+      hidden_at: new Date().toISOString(),
+      hidden_by_email: getAuthState().user?.email?.toLowerCase() ?? "",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("session_key", sessionKey);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function restoreHiddenSessionNotes() {
+  requireAdmin();
+
+  const { error } = await supabase
+    .from("session_notes")
+    .update({
+      hidden_at: null,
+      hidden_by_email: "",
+      updated_at: new Date().toISOString(),
+    })
+    .not("hidden_at", "is", null);
+
+  if (error) {
+    throw error;
+  }
 }
 
 export async function saveSessionNotes(sessionKey, sessionDateOrTitle, titleOrNotes, maybeNotes) {

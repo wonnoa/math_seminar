@@ -125,6 +125,8 @@ create table if not exists public.session_notes (
   session_date date not null,
   title text not null default '',
   notes jsonb not null default '[]'::jsonb,
+  hidden_at timestamptz,
+  hidden_by_email text not null default '',
   updated_at timestamptz not null default now()
 );
 
@@ -135,7 +137,7 @@ create policy "session_notes_public_read"
 on public.session_notes
 for select
 to anon, authenticated
-using (true);
+using (hidden_at is null or public.is_admin());
 
 drop policy if exists "session_notes_admin_write" on public.session_notes;
 create policy "session_notes_admin_write"
