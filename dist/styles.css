@@ -509,6 +509,10 @@ body::after {
   content: "👥";
 }
 
+.nav-slot[aria-label="개인 노트"] .nav-slot-icon::before {
+  content: "📝";
+}
+
 .nav-slot[aria-label="공지사항"] .nav-slot-icon::before {
   content: "📢";
 }

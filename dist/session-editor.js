@@ -1,4 +1,4 @@
-import { subscribeAuthState } from "./supabase-auth.js?v=20260416-004";
+import { subscribeAuthState } from "./supabase-auth.js?v=20260508-001";
 import {
   createSessionBlockComment,
   deleteSessionBlockComment,
@@ -7,7 +7,7 @@ import {
   fetchSessionNotes,
   saveSessionNotes,
   updateSessionBlockComment,
-} from "./supabase-data.js?v=20260416-004";
+} from "./supabase-data.js?v=20260508-001";
 
 const initSessionNotes = () => {
   const board = document.querySelector("[data-note-board]");
@@ -16,9 +16,16 @@ const initSessionNotes = () => {
     return;
   }
 
-  const sessionKey = board.dataset.sessionKey;
-  const sessionTitle = board.dataset.sessionTitle;
-  const sessionDate = board.dataset.sessionDate || "";
+  const params = new URLSearchParams(window.location.search);
+  const sessionKey = board.dataset.sessionKey || params.get("key") || "";
+  const sessionTitle = board.dataset.sessionTitle || params.get("title") || "";
+  const sessionDate = board.dataset.sessionDate || params.get("date") || "";
+
+  if (sessionKey) {
+    board.dataset.sessionKey = sessionKey;
+    board.dataset.sessionTitle = sessionTitle;
+    board.dataset.sessionDate = sessionDate;
+  }
   const createButton = document.querySelector("[data-note-create]");
   const status = document.querySelector("[data-note-status]");
   const formatter = new Intl.DateTimeFormat("ko-KR", {
